@@ -29,4 +29,4 @@ download ```ngrok``` binary and then run command to add auth token.
 Need to set env variables for all the variables in ```config.py```
 
 ## Questions
-E-mail jhodges@adobe.com
+E-mail bstaszcuk@backblaze.com or elton@backblaze.com
