@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 
+Resources:
+  b2-entrypoint:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: .
+      Description: 'An entrypoint "router" function for uploading files to b2. Divides the work and distributes it to a separate upload function'
+      MemorySize: 128
+      Timeout: 15
+      Role: 'arn:aws:iam::1234567890:role/service-role/b2-entrypoint-role'
+      Environment:
+        Variables:
+          FRAMEIO_TOKEN: >-
+            fio-token
+          b2_shared_secret: shared_secret_for_verifying_calls
+      Layers:
+        - 'arn:aws:lambda:REGION:1234567890:layer:node-fetch-layer:1'
+  upload-to-b2:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: .
+      Description: 'Receives a name and a url from a entrypoint "router", and uploads to B2'
+      MemorySize: 2048
+      Timeout: 900
+      Role: ''arn:aws:iam::1234567890:role/service-role/upload-to-b2-role''
+      Environment:
+        Variables:
+          ACCESS_KEY: 
+          BUCKET_ENDPOINT: s3.REGION.backblazeb2.com
+          BUCKET_NAME: b2-bucket-name
+          SECRET_KEY: 
+      Layers:
+        - 'arn:aws:lambda:REGION:1234567890:layer:node-fetch-layer:1'
