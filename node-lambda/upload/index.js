@@ -8,6 +8,7 @@ const b2Uploader = ({ name, url }) => {
     console.log("name is " + name);
     const s3 = new AWS.S3({
         endpoint: endpoint, 
+        customUserAgent: 'b2-node-docker-0.2',
         secretAccessKey: process.env.SECRET_KEY, 
         accessKeyId: process.env.ACCESS_KEY
     });
@@ -63,7 +64,7 @@ exports.handler = async (event) => {
         console.log('upload completed successfully2');
 
     } catch(err) {
-        return (`upload failed error: ${err}`);
+        throw (`upload failed error: ${err}`);
     }
     
     return (console.log(`Done uploading ${name}!`));

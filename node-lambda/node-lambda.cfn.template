@@ -11,15 +11,14 @@ Resources:
       Description: 'An entrypoint "router" function for uploading files to b2. Divides the work and distributes it to a separate upload function'
       MemorySize: 128
       Timeout: 15
-      Role: 'arn:aws:iam::1234567890:role/service-role/b2-entrypoint-role'
+      Role: !GetAtt b2-entrypoint-LambdaRole.Arn
       Environment:
         Variables:
-          FRAMEIO_TOKEN: >-
-            fio-token
+          FRAMEIO_TOKEN: { "Ref" : "FRAMEIO_TOKEN" }
           b2_shared_secret: shared_secret_for_verifying_calls
       Layers:
         - 'arn:aws:lambda:REGION:1234567890:layer:node-fetch-layer:1'
-  upload-to-b2:
+  b2-upload:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: index.handler
@@ -28,7 +27,7 @@ Resources:
       Description: 'Receives a name and a url from a entrypoint "router", and uploads to B2'
       MemorySize: 2048
       Timeout: 900
-      Role: ''arn:aws:iam::1234567890:role/service-role/upload-to-b2-role''
+      Role: !GetAtt b2-upload-LambdaRole.Arn
       Environment:
         Variables:
           ACCESS_KEY: 
@@ -37,3 +36,50 @@ Resources:
           SECRET_KEY: 
       Layers:
         - 'arn:aws:lambda:REGION:1234567890:layer:node-fetch-layer:1'
+
+  b2-entrypoint-LambdaRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+          ManagedPolicyArns:
+              - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+          Path: /
+          AssumeRolePolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                  - Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                      Action:
+                          - 'sts:AssumeRole'
+          Policies:
+              - PolicyName: lambda-policy
+                  PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Effect: Allow
+                              Action:
+                                  - 'lambda:InvokeFunction'
+                              Resource: !GetAtt b2-upload.Arn
+
+  b2-upload-LambdaRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+          ManagedPolicyArns:
+              - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+          Path: /
+          AssumeRolePolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                  - Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                      Action:
+                          - 'sts:AssumeRole'
+
+Parameters:
+  FRAMEIO_TOKEN:
+    Type: String
+    Default: your-token-here
+    Description: Enter your frame.io token
