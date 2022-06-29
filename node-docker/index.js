@@ -14,8 +14,10 @@ app.post('/', (req, res) => {
 
     // make sure the environment variables are set.
     envVars.forEach(element => {
-        console.log(`checking ${element}`);
-        if (!process.env.element) {
+        let envVar = 'process.env.' + element;
+        console.log(`checking ${envVar} ${element} : ${process.env[element]}`);
+        console.log(process.env.FRAMEIO_TOKEN);
+        if (!process.env[element]) {
             throw(`ERROR: Environment variable ${element} not properly set`);
         };
     });
@@ -27,10 +29,6 @@ app.post('/', (req, res) => {
 });
 
 app.listen(8675, () => console.log('Server ready and listening'));
-
-function checkEnvVars(envVar) {
-
-}
 
 async function fetchAssetInfo (id) {
 
