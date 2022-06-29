@@ -4,14 +4,15 @@ const express = require('express');
 const stream = require('stream');
 
 const app = express();
-app.use(express.json()) 
+app.use(express.json()); 
 
 app.post('/', (req, res) => {
 
-  console.log('print ' + JSON.stringify(req.body));
-  
-  let entryResponse = entryPoint(req.body);
-  res.json({requestBody: entryResponse}); 
+  //console.error('print ' + JSON.stringify(req.body));
+    if (typeof process.env.FRAMEIO_TOKEN !== 'undefined' && process.env.FRAMEIO_TOKEN !== null){  
+        let entryResponse = entryPoint(req.body);
+        res.json({requestBody: entryResponse});
+    } 
 
   //res.send('Hello World!')
 })
