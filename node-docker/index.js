@@ -8,22 +8,31 @@ app.use(express.json());
 
 app.post('/', (req, res) => {
 
-  //console.error('print ' + JSON.stringify(req.body));
-    if (typeof process.env.FRAMEIO_TOKEN !== 'undefined' && process.env.FRAMEIO_TOKEN !== null){  
+    //console.error('print ' + JSON.stringify(req.body));
+
+    // make sure the environment variables are set.
+    if ('FRAMEIO_TOKEN' in process.env &&
+        'BUCKET_ENDPOINT' in process.env &&
+        'BUCKET_NAME' in process.env &&
+        'ACCESS_KEY' in process.env &&
+        'SECRET_KEY' in process.env && ) {
+
         let entryResponse = entryPoint(req.body);
-        res.json({requestBody: entryResponse});
-    } 
+        res.status(entryResponse.statusCode);
+        res.json(entryResponse.body);
+    } else {
+    res.send('Environment variables not properly set!')
+    }
+});
 
-  //res.send('Hello World!')
-})
-
-app.listen(8675, () => console.log('Server is up and running'));
-
+app.listen(8675, () => console.log('Server ready and listening'));
 
 async function fetchAssetInfo (id) {
 
     const token = process.env.FRAMEIO_TOKEN;
+
     console.log("asset id: " + id)
+
     let path = `https://api.frame.io/v2/assets/${id}`;
     let requestOptions = {
       method: 'GET',
@@ -32,6 +41,7 @@ async function fetchAssetInfo (id) {
         'Authorization': `Bearer ${token}`
       }
     };
+
     console.log("asset path: " + path)
 
     try {
@@ -43,9 +53,9 @@ async function fetchAssetInfo (id) {
         if (result._type == 'version_stack') {
             console.log(`version_stack detected, processing stack: ${result.id})`);
             let {url, name} = await fetchAssetInfo(result.id + '/children');
-            //console.log('in stack ' + JSON.stringify(versionStack));
+
             console.log("version_stack processing finished");
-            return { url: '', name: "Version Stack named: " + result.name };
+            return { url: '', name: "Version Stack named: " + result.name }; // using empty url value for logic in main
         }
 
         if ( result.length ) { // more than one result means it's a folder or version_stack and we need to iterate
@@ -127,7 +137,7 @@ const b2Uploader = ({ name, url }) => {
 
     const s3 = new AWS.S3({
         endpoint: endpoint, 
-        region: 'us-west-004',
+        region: 'backblaze',
         customUserAgent: 'b2-node-docker-0.2',
         secretAccessKey: process.env.SECRET_KEY, 
         accessKeyId: process.env.ACCESS_KEY
