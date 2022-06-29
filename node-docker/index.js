@@ -3,6 +3,8 @@ const fetch = require('node-fetch');
 const express = require('express');
 const stream = require('stream');
 
+const envVars = ['FRAMEIO_TOKEN', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
+
 const app = express();
 app.use(express.json()); 
 
@@ -11,21 +13,24 @@ app.post('/', (req, res) => {
     //console.error('print ' + JSON.stringify(req.body));
 
     // make sure the environment variables are set.
-    if ('FRAMEIO_TOKEN' in process.env &&
-        'BUCKET_ENDPOINT' in process.env &&
-        'BUCKET_NAME' in process.env &&
-        'ACCESS_KEY' in process.env &&
-        'SECRET_KEY' in process.env && ) {
-
-        let entryResponse = entryPoint(req.body);
-        res.status(entryResponse.statusCode);
-        res.json(entryResponse.body);
-    } else {
-    res.send('Environment variables not properly set!')
-    }
+    envVars.forEach(element => {
+        console.log(`checking ${element}`);
+        if (!process.env.element) {
+            throw(`ERROR: Environment variable ${element} not properly set`);
+        };
+    });
+    
+    let entryResponse = entryPoint(req.body);
+    res.status(entryResponse.statusCode);
+    res.json(entryResponse.body);
+    
 });
 
 app.listen(8675, () => console.log('Server ready and listening'));
+
+function checkEnvVars(envVar) {
+
+}
 
 async function fetchAssetInfo (id) {
 
