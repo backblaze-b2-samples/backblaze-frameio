@@ -1,0 +1,866 @@
+[
+    {
+        "archive_scheduled_at": null,
+        "versions": 0,
+        "item_count": 0,
+        "archive_status": null,
+        "thumb_orig_ar_540": null,
+        "page_full": null,
+        "fps": 23.976,
+        "creator":
+        {
+            "image_32": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=32&height=32&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "upload_url": null,
+            "updated_at": "2022-06-25T13:25:15.316630Z",
+            "email_preferences": null,
+            "inserted_at": "2019-01-10T15:09:40.415062Z",
+            "id": "c36e05d8-6bad-42ed-ae7a-c922ac7157b1",
+            "email": "emery.demo.donottouch@gmail.com",
+            "highest_account_role": null,
+            "profile_image": "https://frameio-uploads-production.s3-accelerate.amazonaws.com/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-resource_id=c36e05d8-6bad-42ed-ae7a-c922ac7157b1&x-amz-meta-resource_type=user&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZ5BPIQ3GJVSAXJ5T%2F20220627%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220627T150729Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=8268018a19517baf1792461c532fe99e41224923dc12cda6ad8b40d716f63e3b",
+            "name": "Emery",
+            "deleted_at": null,
+            "timezone_value": "America/New_York",
+            "location": null,
+            "digest_frequency": "*/5 * * * *",
+            "next_digest_date": "2022-06-25T13:30:00.000000Z",
+            "image_64": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=64&height=64&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "profile_image_original": null,
+            "first_login_at": "2019-01-10T15:10:02.532000Z",
+            "mfa_enforced_at": null,
+            "context":
+            {
+                "company_name": null,
+                "id": "b29886dc-0e0a-4b01-8e2c-2acf748ddc43",
+                "industry": "Media Company",
+                "job_title": null,
+                "role": "Video Editor",
+                "team_size": "Just me"
+            },
+            "from_adobe": false,
+            "account_id": "33356e2e-e963-40ae-a9e1-09ee032f6726",
+            "image_128": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=128&height=128&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "joined_via": "organic",
+            "bio": null,
+            "from_google": true,
+            "image_256": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=256&height=256&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "_type": "user",
+            "phone": null,
+            "last_seen": "2019-02-07T19:23:25.496938Z",
+            "features_seen":
+            {
+                "id": "d26e5516-edef-496c-a360-102b645adcc8",
+                "player_page": true
+            },
+            "roles": null,
+            "user_default_color": "#40ff40",
+            "email_confirm_by": null
+        },
+        "hls_manifest": "https://stream.frame.io/manifest/hls/master?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOnsidmlkZW8iOlsiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS80N2JmYzIxMy1jMDc0LTQyODQtYTFiZi1jYzZjZGNlMWY5ZTIvaDI2NF8zNjAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS80N2JmYzIxMy1jMDc0LTQyODQtYTFiZi1jYzZjZGNlMWY5ZTIvaDI2NF81NDAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS80N2JmYzIxMy1jMDc0LTQyODQtYTFiZi1jYzZjZGNlMWY5ZTIvaDI2NF83MjAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS80N2JmYzIxMy1jMDc0LTQyODQtYTFiZi1jYzZjZGNlMWY5ZTIvaDI2NF8xMDgwX2Jlc3QubXA0Il0sInVzZXJfY29uZmlnIjp7InRlYW1faWQiOiJjMmYxNDJlOC1mY2E4LTQzOGMtYTZiZS1kYzk4YzJiYTU4NDUiLCJzZXNzaW9uX2lkIjoiOWQ3ZWI3MWYwMTg0ZTBmZjcyODNhMzZiMTdlYzNjMmZlZTk1ZWI0MSIsInJldmlld19saW5rX2lkIjpudWxsLCJwcm9qZWN0X2lkIjoiY2ZhYjcyZDQtOTA2My00ZDljLTgyNGMtMjAyOWQ2NjQ1OWI1IiwicHJlc2VudGF0aW9uX2lkIjpudWxsLCJwbGF5ZXJfdHlwZSI6ImludGVybmFsIiwiYXNzZXRfaWQiOiIxNTM0YTliYy1lNzZmLTQwZGMtODIwYy1kNTdmMzVjY2Y2ZDUiLCJhY2NvdW50X2lkIjoiZGMxMjZlNGQtODI5Ny00OTJhLWE4MTEtYjdmYjc5NTA5MWMwIn0sImlkIjoiMTUzNGE5YmMtZTc2Zi00MGRjLTgyMGMtZDU3ZjM1Y2NmNmQ1IiwiYXVkaW8iOlsiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS80N2JmYzIxMy1jMDc0LTQyODQtYTFiZi1jYzZjZGNlMWY5ZTIvaDI2NF8zNjAubXA0Il19LCJleHAiOjE2NTY0Mjg4NDl9.wUuSNUIlfMcVaoX0AG0R7MKTzwWDuDh4OVOa56AQkuI",
+        "image_full": "https://assets.frame.io/image/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/image_full.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=It1fk-t5m~~hzZ73~0iBEbLhWHP8LbYPQ0mUwgTWNisMLh15MpwzD5WXNdDchU6h4OA-RqaTOJ~-y2V-Woq1P0-raaQfKvWtpskZ9FnFBtXbcX~lfDdRhOsh2gMfFAGrX~ldi9C4bFglve3Hyvo6jfi2kujihaRJDUKeQtnMYII8~MqC-C96daek-h3LpJ2AXzZFwfVO961ukHhadxcKFuunxPSJLl0QDgvkU1Ci8kBPZ7kqR~4KACGwgduxxdK2TJ8potO99Yu3JbTp8U4V9mQRkfQ~YC-Ht018igJJp92d4S8VGi0DAT9vaqHaw3smxtZQCmThQ5bnJnfDGMRdkQ__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "description": null,
+        "thumb_scrub": "https://assets.frame.io/scrub/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/thumb_scrub.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=lRf8c9G2Ea05a9GPzCUQjqXmWTR2OZcnmXFM96AsoBoSbXIe9Q2zJIm263lKj7DxHQH8bgvr4Nz15s4b5~rTMZB2xeaXsMN8E48KXLX9208RtqiFXfTTp5WnebZR84hHCkDMzu3uJDDF2-9xq8kKnbWzM6cmXS41Zp~EwRzpPc7Zm~HdmlK3zIB-h53syKCrEV5D1dHonSL7vKl6LKRr5oVHs2rXAJrYqzkZxqEkslY9CdMGSUzYkyGNoob5q5VP-z0JTTWN5LlxLuL4-kOXlqOUXAJ1SyNABUP93g36LH0vNb1S0Q4w9rCB6PyvwlgbIKV7QF33E1S6lQzBsDwI2Q__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "shared": false,
+        "h264_360": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_360.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=Z6Gc7U3m6VKg0-gRF-VvOfHdrJ~dV8Y62Hcn9aJRx113pPHM1VPikiFH2O9TtfwbLKgiGzgsDaQHtikXOUgpGlLUp7beVIAE7VjAXxuRr13RbDTMSo-56DQVL9bTOUbLMR-bDAiNPK73R8VFEumIAenmhegM6fxhIsL0K07b7uwoegEMbO~VrXt87qkJ3dU1napQqte-fohWoDmh7FSTPl~CGLjh8amSaBiSK6b-Anv0tqEtDhbDFVqP1OqJ2emTJRi6WdPR--Zgs7Wvoh8MLGe8mFRsK3DpCjY1sHmxQmF6lWJCMc1CwrHeA2JlGfUVOCjnOf82ciH8dsM-Umj96A__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "thumb_540": "https://assets.frame.io/video-thumbnail/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/thumb_540.png?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=OYyeQBCQurYG9ZvPUJcRtS-vf2YP1Fn~S7D9katgisG8Z5OMYVL4I7Fhnaljlb3owIF7Pd0MyYwnULO-cCO7bMW0QNKsPf56Or4KGeJUexOVkkndACQtEupKmK2qSjKTZlgi1cEpTihBQzjfiPVr7eD9IaDIOr1Nmm1f~RFi8KDPGFgYVIfKzswyLyGy0XL81hvnsf-WA1BnprOJYXgeOkd3pZ4is-T3pd5xZ9Ogin3aZWn7RfZ1vCEbhVqRXe7oP8Y5OYWE2vGUIbnAEPyPAdo9MDG929IIvohFggJbO390FjkyD3Vey69Bp2ud38nh55QnYUAs5Gb4-A8EMUtW5g__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "user_permissions":
+        {
+            "can_download": true,
+            "can_manage_devices": true,
+            "can_modify_template": false,
+            "can_public_share_presentation": true,
+            "can_public_share_review_link": true,
+            "can_share_downloadable_presentation": true,
+            "can_share_downloadable_review_link": true,
+            "can_share_unwatermarked_presentation": true,
+            "can_share_unwatermarked_review_link": true,
+            "can_view_devices": true
+        },
+        "allow_original_playback": null,
+        "updated_at": "2022-06-10T15:32:06.228191Z",
+        "archived_at": null,
+        "team_id": "c2f142e8-fca8-438c-a6be-dc98c2ba5845",
+        "h264_540": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_540.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=aZsQcEM0m40dF51sP0KscfvWpvc9aWDxDv71G~4Yullznl3IkzOQz9u09PcigGfVlIfIEWiLlG5QWW2a7xfCM677l2yyV7CFpRZ3LFCy0URvQ1rqJ55ZNm1ltOdyCjUbZs6S1kUtOtd8nzQut~pFV2MF9wmmQEd~oOqTs~EQ9EH8zQmRmNIvqX5L0KKA7MkENRehcLm-LDUz9o4QbFN0T41iCfm-76aMZsyvHLrWu0bJ9PDZmzU2sXtUSEMF50RaNyv7udxln61RMfXApwpD2LP3TTgA2H3smMIFJ7PYwTcKrL2aFsShztfpxWG8YdZILd3ewweOESOYATwULRLueg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "uploaded_at": "2019-01-31T21:02:51.573588Z",
+        "required_transcodes":
+        [
+            "cover",
+            "h264_1080_best",
+            "h264_360",
+            "h264_540",
+            "h264_720",
+            "image_full",
+            "thumb",
+            "thumb_540",
+            "thumb_scrub"
+        ],
+        "inserted_at": "2022-06-10T15:32:06.228191Z",
+        "cover_asset_id": null,
+        "frame_thumb": null,
+        "thumb": "https://assets.frame.io/video-thumbnail/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/thumb.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=IbEJ5tD5F-rExn-h0j95zsymdl4ErJek16uwV78NGek6DRFHIIz7RrpSvtpB3qWUTGtn2PPBnISzhBRE~EYKc6qd1al4ZnbX6~BEHZn9IMN7JGlhjXVN3iqbnFMXY~TYLA5X-wGVkrJj8hgAjGsyk0D5UsI56ys~j8qJeTJCDfqIw-Ss2HsBr5LNoF6V6ZICDlZIvWMLv4gcB~SHRefjHwIPacUjsFNsLEtSOrQHtsSbeQiJMu5yihqU6jue~JMGjR9AtQ97gQARFt72xFgrwmN7UmwoduY56ExCyTOXg1t~jRlCkonBYCvBT4l74Fxgm~FdRm5Ye-VnobkNaTfSAA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "label": "none",
+        "video_h264_180": null,
+        "view_count": 41,
+        "id": "1534a9bc-e76f-40dc-820c-d57f35ccf6d5",
+        "original": "https://assets.frame.io/uploads/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/original.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Graded.mp4%22&Expires=1656428849&Signature=ST3LGi1pWDiOb9fbQE7t05yU68X9imfauU2ou85T4b58SdPCiWWLfvoaLstGT1A~9eswMnvhPZULvCct5HLCkI2chNRxCciKHXrMfpQ8EuioP4d1pNbtXEyyQab-oHl3D3qiCHp~2rb1V5Z2q6FmjbO~XJZshNFQWFO7wl-duAi21W1l45NwZ4SlVz5VqvnUzQ-RlIsklAUEop9HqrJxITAX-7wRY6NWR~3ZUUooJp6~4mpyRxkKrjr8VoE7WGhlDhsThpXbg3B7oOfg3ZP~ZFKvBlxW4Dy5B64JEps1zicG-gaWzMgKeaDLy99eoAq6uovEBvXnxfSsFddioMOGNQ__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "webm_1080_best": null,
+        "drm": null,
+        "project_id": "cfab72d4-9063-4d9c-824c-2029d66459b5",
+        "h264_1080_best": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_1080_best.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=NGkBH4fwWQwV9iB7khGB37V0th71w5oSK15wl7fXp92vCQ87hXi5PA0Qkc9uvFLMRbyyWjOg7jZQBdI6jyjbHhqGVq~kgW5vDjXN09fGw3Vj3l-YNAQrBXum~t3Ij-HDPE-f8DavRaqOxvjuO43gjzuDp82~DX4VfiXszKwwWrTROm7CsuhPOjSl4P6tv02eCZcqjb4ns26qIzdTuvWFwKhKctycVgfI0xTYBfKX3XGSaVaB0anrKoy3MX42XxlW0E5SuF8hH14YsL66AbD2EPKlxpZ1U7U7s96wUjgNzwD8~QlpzRple2Hr6YA63x7r6rTT1GHuHYgQga~wNHJHPg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "rating": null,
+        "public_item_count": null,
+        "waveform": null,
+        "name": "Full Spot - Graded.mp4",
+        "webm_360": null,
+        "deleted_at": null,
+        "frame_custom": null,
+        "downloads":
+        {
+            "h264_1080_best": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_1080_best.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Graded.mp4%22&Expires=1656428849&Signature=ojhbZUxfO4jYIBRLyITbw5pXU0WNI~HiRiO1YgzhZTRxSRkcdZ8eCRLyntv0ltx-Ma9hF1maxrA-dW0J-Ee-OfzRQ~vC8Cd-FjMrW2QKGl5TaTU85~ldLt4xRxJHdlkg-CZZvfhfqShRSNHqjAQ20hcaY9YS1nXpttb-yQx2WL5MDGNK0AWUgC~EpMVLooOnjXOBhgbOT70BS~ikJOLtPQcYVkBfIZTfJ8qu67pjG0LrvVmwIb~rZwusz1BvKcm9GE2xCJPwyua4i~bueCmpTkZkSb2PC0N62W3nXuLY83xmfXkLqLdasGY5VdLtxetsTyfSWLyh76Xe7SDEOEyt0w__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_2160": null,
+            "h264_360": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_360.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Graded.mp4%22&Expires=1656428849&Signature=krfqToYTKXKBKKCtZcYTf1giow0hxbdfQ3EOVpyQFtYQQs4deSy5srgyVSJTvEM-3NDCmcl6V7PtxUJqA474TJSIOwRWnE~hGexDM9PfJzVjp6tf9e0HSpvsFCgX8HxsWS4gIVps62F82MObk-Ts8TZIWwkXan0Ua1~~EBvVhtWZZs-aO~Yhq1KTlUnafyk0AtIHAXSFRIKSTgGMmmkyW-4B5M2ot5hWb2Q6u6yBhgR4QELZXdoMmyZYxHJNEAezlXLSv1X1W-KCbnnjd2bSqQUemzI5V9FjLriPRgyCaE~5o7XkiOXzZHxeES8cYQMF7Dhy402BnPgQWBqlXCiZAw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_540": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_540.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Graded.mp4%22&Expires=1656428849&Signature=jyiW3DD2wGrkWrrNtSz2XuQe46FtMRJzdd4idWhnKVj15EBpfVmKK7vdSVsOejJPPMgSDW6gWGPo9T8-XLLsDxzWYZeR41zJ5j3mbSzAMFPCYDPgsj0Ux7Nn45b1BZ15b1e9yTbTXCrpvlEvpWBBUqfUD5BgYpLrTENi8HgVyMoRogbjXhJcW3Eaeo6yDaZ2Gt1VREwj0fGdEU8ssJUB3hpRp4mne9m7EzOuzxvzHTKDrUVFaYHuR1eqIgLRPXUgb-27uNITk8wNJZIMyOx5LzHPHeLkAxtci5M~D9Eul~q6k1bEbXqCU1fjKj4iSpz2EBEvGrpxyRH~Z-33zEK8sA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_720": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_720.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Graded.mp4%22&Expires=1656428849&Signature=diVCjgA6pQGNuYkIXEAdZLI3xsnP0XKuL7aSocFc2qDU9cYj99qKXuCIYoFnxAgvxvYpZAuuER-a~AIhX6Dp0DdNjo8nkQDMTTqsI4MZXRbnheaVN7SFcGi9h5mdElJd6tnFlS5fLCVwVhg7yG05452vqhOWw10dd3lPjQ0Cp~Ys9oxLZZwaxFA3UnqvRsaf-nXADwxM1tVCkm3hKaJDwqBliBWHv68xK3D0QqUVlKakGqTzdnuQXECUqfPE0IlSgr9ycAgCRHYXfakwyGKGUlmI8GKQgHdoJnlcEVs7Frc-vnC4vpipyyttggMCabuAuXX2nbNPU0-lxm2jK1-CSg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "image_full": "https://assets.frame.io/image/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/image_full.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.jpg%22%3B+filename%2A%3D%22Full+Spot+-+Graded.jpg%22&Expires=1656428849&Signature=KkWu0C3BmeynU0F0j0eKHLlpsKG7GCNr7LRibr2yXN17UU8-mTaAmyCRtRYE6XGp3-no5VTwUud-2c-c9LLvLOhimUTR85UEglGlxx45Sa1nektHPFLCCKrT2NM3YMHMWGC8DAkuYruutnMqsaLoVc-D7v-9QQuhECD2E90BamoT7NBuCfkThsRbYgY13VbX36COZQ3UsMSnnZp8sUadqfD4H2Id1BGv5EziJ6HiombJjKNe9~WSodMcQhGPROhSpVw3knaMZ~xuy8gqqao4QRV3auaL4oVmtWj8~O1mF6RyZzNrI~fAxB-uVoYxf97qWIYgdi17XPQX7ai1rykVdQ__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "image_high": null,
+            "image_small": "https://assets.frame.io/image/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/image_small.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Graded.jpg%22%3B+filename%2A%3D%22Full+Spot+-+Graded.jpg%22&Expires=1656428849&Signature=WH~xEXn2umFkCJhjjmaNVKwhEQpMDT2BsZLE3Ld-jKrBVcQfXvM4GScIkT0G5HcSHXjMNo6zBnUn5PwdyBcXRMZnlwY6l~ezR6I3rTZLjcDqORhwT407CAsBfWPPoHWuY6TpHdpr~HkSuU8mYdZkj3BBoWnhX4NARe0mVTllXJcMUL7yCYahrMt79tf8Xq4Ri~nXf9AtogwVp0D5qO07yJKpjNHsd1OkLcGB5UfTj-FR-LkNtsyjOLdo4mBxr9jdWgUfrMF14JWC6uvEysS5wH1FtHTysUb5PFuii~FhStvKSK3TuVTX~3rfASn5EvSJvTsh4jYjPiw7TFJWMhjYMA__&Key-Pair-Id=K1XW5DOJMY1ET9"
+        },
+        "autoversion_id": null,
+        "upload_failed_at": null,
+        "audio_tracks": null,
+        "comment_count": 7,
+        "source": null,
+        "metadata_flags": null,
+        "status": "transcoded",
+        "hard_deleted_at": null,
+        "private": false,
+        "cover": "https://assets.frame.io/video-cover/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/cover.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=hobl2mv1NzrFa1DIfRV7LwS2fwTekgcNxNiDDVJiQPhTO1FoOLR-2aq1JqTwQe4FpoevvKe-Fsz8xM8QuLCIwd0S4y2GnyTRcHdztA9web9vhlnE3zWiatakiHGT8RUx4pvdi3owmGYY7vD6Ntq0~TVIIF~2WhRK6cb4xdru1ngTjzCAIhFt2aQV2TjjLqKB4K~gp5v0hd9rd~NGnGFd5pU3Qr85wrUjRBgJRDhlpq7mdM8GXSSuF2BgjHtHionS4cToD5MFP40nxdICDGqyV3DZ~IzgaEYnTPB-vyVOOTYWPl~mrkxiTNuKY~H~cHV2oKI~2cosBxVUvUBpezSW2w__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "account_id": "dc126e4d-8297-492a-a811-b7fb795091c0",
+        "page_small": null,
+        "type": "file",
+        "creator_id": "c36e05d8-6bad-42ed-ae7a-c922ac7157b1",
+        "frame_cover": null,
+        "filetype": "video/mp4",
+        "copy": true,
+        "_type": "file",
+        "asset_type": "stream",
+        "transcoded_at": "2019-01-31T21:04:50.196120Z",
+        "page_thumb": null,
+        "checksums": null,
+        "parent_id": "7914367f-dd59-4123-a394-6f0f56f95d40",
+        "h264_720": "https://assets.frame.io/encode/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/h264_720.mp4?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=BzjiLXpwwp8QQEvSbFYHxcHskZ7386OqQqzURrZQPQEJJ1d-ZFO1T2kFAcrvTqtpeV9tLtkR1PkiG2Qps27hOWoMVD5DeyMMvRsaI9-ZQtCd7lSwxFW~XY8IZzwZpRbMe9H26HaZEz8vMeiaMy~fPuPu5-Qcc6fSoqU~G833FkEgwu6TmVgmVpOB2e3ot9993tdxWMRqNeNgm49yi4tLePul4fKNfUZZT~TDOikSceCdpt6waDQrKcnn3z3A0tUx4~b-0f~NZTb-9mf9jq0M-aDDef3EkUgVu1gvt2xLt2qJpJ23eHBRyrmaCQVjApod6Vmv1FZqGrKU--~HOKmzFw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "is_360": false,
+        "subtitle_tracks": null,
+        "transcode_statuses":
+        {
+            "cover":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 42435,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "h264_1080_best":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 59592639,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_360":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 16295142,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_540":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 26066382,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_720":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 37181178,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "image_full":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 49640,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "image_small":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 8828,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "thumb":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 4493,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "thumb_540":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 386759,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "thumb_scrub":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 247100,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            }
+        },
+        "upload_completed_at": "2019-01-31T21:03:38.423415Z",
+        "frames": 2037,
+        "index": -2.0,
+        "duration": 85.013333,
+        "filesize": 534449054,
+        "properties": null,
+        "h264_2160": null,
+        "image_high": null,
+        "webm_540": null,
+        "webm_720": null,
+        "includes":
+        [
+            "video",
+            "audio"
+        ],
+        "is_session_watermarked": false,
+        "archive_from": "2022-06-10T15:32:06.228191Z",
+        "transcodes":
+        {
+            "_type": "transcode_state",
+            "codec": "AVC",
+            "id": "338a9dcc-fb31-4408-9701-374aedf53318",
+            "original_height": 1080,
+            "original_width": 1920,
+            "resolutions":
+            [
+                1080,
+                720,
+                540,
+                360
+            ],
+            "thumb_height": 135,
+            "thumb_state": "media",
+            "thumb_width": 240,
+            "thumbs": 50,
+            "total_audio_tracks": null
+        },
+        "project":
+        {
+            "_type": "project",
+            "archive_status": "standard",
+            "archived_at": null,
+            "archived_file_count": 0,
+            "archived_storage": 0,
+            "collaborator_count": 1,
+            "deleted_at": null,
+            "description": null,
+            "file_count": 1,
+            "folder_count": 0,
+            "id": "cfab72d4-9063-4d9c-824c-2029d66459b5",
+            "ignore_archive": false,
+            "inserted_at": "2022-06-10T15:32:06.178628Z",
+            "invite_url": null,
+            "name": "Demo Project",
+            "owner_id": "824a974c-35c8-4283-8e41-bb31ad95e753",
+            "private": false,
+            "read_only": false,
+            "resource_id": null,
+            "root_asset_id": "db517e54-e8d5-4d56-aff5-6b2f7cadd1d5",
+            "shared": false,
+            "storage": 10546620,
+            "team_id": "c2f142e8-fca8-438c-a6be-dc98c2ba5845",
+            "updated_at": "2022-06-10T15:32:36.219070Z",
+            "user_permissions":
+            {
+                "can_download": true,
+                "can_manage_devices": true,
+                "can_modify_template": false,
+                "can_public_share_presentation": true,
+                "can_public_share_review_link": true,
+                "can_share_downloadable_presentation": true,
+                "can_share_downloadable_review_link": true,
+                "can_share_unwatermarked_presentation": true,
+                "can_share_unwatermarked_review_link": true,
+                "can_view_devices": true
+            }
+        },
+        "resource_id": null,
+        "image_small": "https://assets.frame.io/image/47bfc213-c074-4284-a1bf-cc6cdce1f9e2/image_small.jpg?x-amz-meta-resource_id=1534a9bc-e76f-40dc-820c-d57f35ccf6d5&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=n3fkT4TbAqUcGh9bp3QLYZVtrqeXsUszmszwJPG~uqQfZukZ4ymZTQp4ocrOp3vt8PhWjedOEee9bDr1ksAyb4yuQuMHNd~Ap8ZopPgK4IhZ3FXQtPSr3hbO~kFlYp8Cz4PHATIjf7h3esWpHf-ICGtXCuA8glwJyxgij6n-oB2lbhcBRZQBMqz5aY6iZVR0lfzs1SnjBBk1FpAp1qmeARrWjGczjCBxNqHW84pdcf89xMOlFCcQdduMISP8XULLMEOgLk-~dd-9E-F7uIXFl5N8Ne-RfjOmH-7qERUQGzEoeenSYeVmBNqHL5Vdu2TbjLnmrzBHSl2a2l~AlJG5Lg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "page_high": null,
+        "is_hls_required": false,
+        "timecode": null
+    },
+    {
+        "archive_scheduled_at": null,
+        "versions": 0,
+        "item_count": 0,
+        "archive_status": null,
+        "thumb_orig_ar_540": null,
+        "page_full": null,
+        "fps": 23.976,
+        "creator":
+        {
+            "image_32": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=32&height=32&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "upload_url": null,
+            "updated_at": "2022-06-25T13:25:15.316630Z",
+            "email_preferences": null,
+            "inserted_at": "2019-01-10T15:09:40.415062Z",
+            "id": "c36e05d8-6bad-42ed-ae7a-c922ac7157b1",
+            "email": "emery.demo.donottouch@gmail.com",
+            "highest_account_role": null,
+            "profile_image": "https://frameio-uploads-production.s3-accelerate.amazonaws.com/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-resource_id=c36e05d8-6bad-42ed-ae7a-c922ac7157b1&x-amz-meta-resource_type=user&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZ5BPIQ3GJVSAXJ5T%2F20220627%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220627T150729Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=8268018a19517baf1792461c532fe99e41224923dc12cda6ad8b40d716f63e3b",
+            "name": "Emery",
+            "deleted_at": null,
+            "timezone_value": "America/New_York",
+            "location": null,
+            "digest_frequency": "*/5 * * * *",
+            "next_digest_date": "2022-06-25T13:30:00.000000Z",
+            "image_64": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=64&height=64&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "profile_image_original": null,
+            "first_login_at": "2019-01-10T15:10:02.532000Z",
+            "mfa_enforced_at": null,
+            "context":
+            {
+                "company_name": null,
+                "id": "b29886dc-0e0a-4b01-8e2c-2acf748ddc43",
+                "industry": "Media Company",
+                "job_title": null,
+                "role": "Video Editor",
+                "team_size": "Just me"
+            },
+            "from_adobe": false,
+            "account_id": "33356e2e-e963-40ae-a9e1-09ee032f6726",
+            "image_128": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=128&height=128&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "joined_via": "organic",
+            "bio": null,
+            "from_google": true,
+            "image_256": "https://picture.frame.io/image/convert/frameio-uploads-production/users/c36e05d8-6bad-42ed-ae7a-c922ac7157b1/image_1548713976.png?width=256&height=256&resize=fill&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2Vycy9jMzZlMDVkOC02YmFkLTQyZWQtYWU3YS1jOTIyYWM3MTU3YjEvaW1hZ2VfMTU0ODcxMzk3Ni5wbmciLCJleHAiOjE2NTg5MzM3OTd9.4iHkwL0upWP_Irw0fDq3cnmsJT7SJL-3K9Kx4uYC7ks",
+            "_type": "user",
+            "phone": null,
+            "last_seen": "2019-02-07T19:23:25.496938Z",
+            "features_seen":
+            {
+                "id": "d26e5516-edef-496c-a360-102b645adcc8",
+                "player_page": true
+            },
+            "roles": null,
+            "user_default_color": "#40ff40",
+            "email_confirm_by": null
+        },
+        "hls_manifest": "https://stream.frame.io/manifest/hls/master?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOnsidmlkZW8iOlsiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS9mNmRjZGM4YS02NmE0LTQxMjYtOGUyNC1lYWZiYTM2N2FlNjUvaDI2NF8zNjAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS9mNmRjZGM4YS02NmE0LTQxMjYtOGUyNC1lYWZiYTM2N2FlNjUvaDI2NF81NDAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS9mNmRjZGM4YS02NmE0LTQxMjYtOGUyNC1lYWZiYTM2N2FlNjUvaDI2NF83MjAubXA0IiwiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS9mNmRjZGM4YS02NmE0LTQxMjYtOGUyNC1lYWZiYTM2N2FlNjUvaDI2NF8xMDgwX2Jlc3QubXA0Il0sInVzZXJfY29uZmlnIjp7InRlYW1faWQiOiJjMmYxNDJlOC1mY2E4LTQzOGMtYTZiZS1kYzk4YzJiYTU4NDUiLCJzZXNzaW9uX2lkIjoiOWQ3ZWI3MWYwMTg0ZTBmZjcyODNhMzZiMTdlYzNjMmZlZTk1ZWI0MSIsInJldmlld19saW5rX2lkIjpudWxsLCJwcm9qZWN0X2lkIjoiY2ZhYjcyZDQtOTA2My00ZDljLTgyNGMtMjAyOWQ2NjQ1OWI1IiwicHJlc2VudGF0aW9uX2lkIjpudWxsLCJwbGF5ZXJfdHlwZSI6ImludGVybmFsIiwiYXNzZXRfaWQiOiI0NTE4NGIxNi0xYTg0LTQyYmEtOTc0My02ZmY0NGI4OTNlMmYiLCJhY2NvdW50X2lkIjoiZGMxMjZlNGQtODI5Ny00OTJhLWE4MTEtYjdmYjc5NTA5MWMwIn0sImlkIjoiNDUxODRiMTYtMWE4NC00MmJhLTk3NDMtNmZmNDRiODkzZTJmIiwiYXVkaW8iOlsiczM6Ly9mcmFtZWlvLWFzc2V0cy1wcm9kdWN0aW9uL2VuY29kZS9mNmRjZGM4YS02NmE0LTQxMjYtOGUyNC1lYWZiYTM2N2FlNjUvaDI2NF8zNjAubXA0Il19LCJleHAiOjE2NTY0Mjg4NDl9.JPuMwuMriBgKusfODOrnf7Fb1HeuQi43ZaUe3cHKUb0",
+        "image_full": "https://assets.frame.io/image/f6dcdc8a-66a4-4126-8e24-eafba367ae65/image_full.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=n3UYUVGm7wAKR~Hl-dYABNrPx9CILZca8EymfLjsQWABLQrKMGIJ0khU1oLgMhNbVpN2g7qlUT77fdnCt4NVwPUPnSik~Z2JVYhz~09sfI6tLWqYb3QAQqskg8LcQG~wu6Dwsmw3Yq2WdBSj1uufn2IbfyiIC1lgPmctU7qOsu14JjbITWB7pLOL4XCXdefy-QI9ov7FuwdExHakLJQpLFMPECln-07GYMVwzc7Llsb-3ewE7~5A5mtOMtnWBlBuACNiG5pozd7tenOrPmc59GWi97NJvILtrY9yS55XHWiKB~7FLEbGnQEkvZtQ6v~uW7jKCcm0LuVM5CczNE4gNg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "description": null,
+        "thumb_scrub": "https://assets.frame.io/scrub/f6dcdc8a-66a4-4126-8e24-eafba367ae65/thumb_scrub.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=hNWUvf25Tm9TuJoJwhMRz5mg05BlfbGWSv1QyI~maJw-F5G7-VzUxfIRKmjKZEwlmrc-zTKOR48WIBJ9AL~MV0fvAsiIn73IUHdEHg4PbiMU2m-TMfVTnkJ1iJTChynDRRAAcGRNgOYT9tPckhhu-iNA5yUf0ekhii42BpOTwUm3w9DY0JJDaZeCa1UzFmu4BwChH68EeM~jq0ILY7ZqwSncvsqRa-VI5dYMmBObc5wkRnp8WJu8InLVVQEeoqY8cQq-CgmxwmTC70ijp1i2A-7BF~hzqlYl0iWM8AzU6u9-EcV9bAgKAcfzns4CZ33EOIWAn0WYWFC0kPWLcBPEmg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "shared": false,
+        "h264_360": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_360.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=paNmYDZ6Bo1wNczZEjbhxjAORzWgz8A5i3UXLtXruTqhAcQ4EgVABCpWugh-dz8IX0EOJQ9p4KuFQ0eeQuFH8KkZvUAVQ3DLEwR3qGQc0QUpjwi7LujXm7xWY-yPde3c32J-J~nspWBskm8nfucXmzoCyjhh~c87MfFCLPstyrHf5tPhOsy5hEKDzSLE-p46KnWsWOi283qSi7y~t2eRtqRcXKITxuswhPC1U0EKl2RQ6x5gYxcvOavK-UfP2bLBOgERbb7kFuiiy84M0ooyVnMGJFVCzQCebNIHAWZjF~VSSnB-KfmiMdZ1x0CkVrRqlZHj9~nf5vCcXBoIcc23aA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "thumb_540": "https://assets.frame.io/video-thumbnail/f6dcdc8a-66a4-4126-8e24-eafba367ae65/thumb_540.png?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=C-IwfgWhvYVNLpb51mvQJsdTvy6X0gvyPcykZ~QHysBpCgERurCjPDR1YePzRHoxYZq39imjyeUjRobr~m2nr5DazcPFTMr10~VCQaMDhp51vqxvbm42cfL3eW8Et4qQUJ8SNCaL7SiT1uMMd5ypLYT3UQKwV3gn46bkgexEVSTRmk~n~xN5osDN0QTnWuURmt54CzqBM7M9fgnnvLvQVSJoTz0EL~dA8MhYc02PcBg936GSlK5uivzZM4pXf9qfzVJYtmvt57~mOuTOwEEuh-o0HICC7htlBdTeNVCHuNodJFGidWXoIEs7mfki-p37c4spszDVJzreMeODIp8xOw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "user_permissions":
+        {
+            "can_download": true,
+            "can_manage_devices": true,
+            "can_modify_template": false,
+            "can_public_share_presentation": true,
+            "can_public_share_review_link": true,
+            "can_share_downloadable_presentation": true,
+            "can_share_downloadable_review_link": true,
+            "can_share_unwatermarked_presentation": true,
+            "can_share_unwatermarked_review_link": true,
+            "can_view_devices": true
+        },
+        "allow_original_playback": null,
+        "updated_at": "2022-06-10T15:32:06.228191Z",
+        "archived_at": null,
+        "team_id": "c2f142e8-fca8-438c-a6be-dc98c2ba5845",
+        "h264_540": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_540.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=JmdCK56YyJcabMXq5HYKqrLBuQ1RB-7LGR7Ubd3XiP9MejVGUj7DZJm7HpqTydgwX6Odr52B4mfuoS67JYDVo~arhvoNyIGEbrBxsi~h-30utQd3ojfpcmwcPhRdkFeaC~NKUqpE2rzQnkiMmcB4yEdVEkDcAlgX5GYz59eQbHEHCCyIRCVEl-cBiTy7g9xTlTRBaMfRR5x0ITT7WTIUTvBM6-icXAwym7hseH-bSSCuooU54lkf6dPWWz4JYPhAAdhAKLfzDzOL05ij~gfeNLauW7Zb6BZlzlq9oBillBsZ6eLxBLBnCB2kT8Go~qgfjZ6l52wOGw2NFAUDz6xCFw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "uploaded_at": "2019-01-31T21:02:51.586295Z",
+        "required_transcodes":
+        [
+            "cover",
+            "h264_1080_best",
+            "h264_360",
+            "h264_540",
+            "h264_720",
+            "image_full",
+            "thumb",
+            "thumb_540",
+            "thumb_scrub"
+        ],
+        "inserted_at": "2022-06-10T15:32:06.228191Z",
+        "cover_asset_id": null,
+        "frame_thumb": null,
+        "thumb": "https://assets.frame.io/video-thumbnail/f6dcdc8a-66a4-4126-8e24-eafba367ae65/thumb.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=NewUscWr-1rGZWMTKAxaPWMeT017pTss3Zvt962u9bi0pFRUmmR6dfkXEVYJBt3YvusmgfsCz0MrUNe8~OkKlk35Lb4gFmSAs9kWPcsMN0TwNYn6gxrePW4hDOd3kc5mq-y2DM8sMyx6zWuTWctn3r9j8UEy3aBHvk-Dd1XcuIZuSZUsuPe6yax3IiXDHXgXVk2qs-6DuhGSBZD~P0v~l7ENxU6nZDS8zZ8IcdG16tDs4Og8FNTBE8s4hRbLAkGVz0vKIZay9lhnRLnDacLMs00DZpBAFUBhnaIt~V2bYfzF3ccYwdElSTikgpYj5SfYf7HeC55yeyfs57uIkczgQA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "label": "none",
+        "video_h264_180": null,
+        "view_count": 5,
+        "id": "45184b16-1a84-42ba-9743-6ff44b893e2f",
+        "original": "https://assets.frame.io/uploads/f6dcdc8a-66a4-4126-8e24-eafba367ae65/original.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.mp4%22&Expires=1656428849&Signature=EwUgVf9G9F25jPvVLmu1ZMICWa6RD0Ck0FufyHeRBt2gJAuGl87DYygxNE4hkTbhRMlNRrDxWpXLWE8wq4FBJ~BTfxnuc786ZPCyUD~UrtniBPporpqbzJXVOTQwaodMT6oficRVjGLKi4NNE7yIkBGbTyP1TocpNCe60rfS9uJ5z2BwY5rj1PSYT3y0~2EBfXSTAotGlM6yYaXq0Kz2Rt5RjJEwMKVCeHe0hg9eauwqr8SoHZW6u1aOCFhHiWeSaxstNBVZ~5-aw3m1PogNvonMpoILddOicSHXducw2fg3m6XEHHU48TMPpFOoJGvKmKJ-wfhMOhKB1d3TySZInQ__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "webm_1080_best": null,
+        "drm": null,
+        "project_id": "cfab72d4-9063-4d9c-824c-2029d66459b5",
+        "h264_1080_best": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_1080_best.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=A2-u433Mg0qQUowq0dR5ZndoKt7Rt4YEwJhGonJ9L2Ea-TY5YuQrX8H-WzBYZDgOe2Kon941j4jCx2ai5HEGbI4KchGp0BnsTM4QBn4TMdby3UQ4gnBATxYYL64d81jvZjsXkrLJkGYiUMiCF8crCIFkDtP2teh~CeUHXJzaMd7vB7vtLoMs6Kd-bXL~qbIhShWh~6V3Sp0dBl7gqYJT1pTfteF8Bf237FD-op9u5~RI7lYbTJCy81UIxheXbC4F7RtG-Dpu1XrvJ~cBBpIE5afle8Oh3nUWpidpIg23Tq0wEosEHJIUWvUcf3HyxflBArxJd3STzEFGIxS0uW5fZw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "rating": null,
+        "public_item_count": null,
+        "waveform": null,
+        "name": "Full Spot - Ungraded.mp4",
+        "webm_360": null,
+        "deleted_at": null,
+        "frame_custom": null,
+        "downloads":
+        {
+            "h264_1080_best": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_1080_best.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.mp4%22&Expires=1656428849&Signature=WsBuqizZqMmGfqYiFYMBmwrnxTPM0-Cd6rHUDStKAPsXSQLppqK99dDlaBJsfzLhyGoUNybK40bt13VVr8F3RcqqHxdKKM9AofF5EA0AK11EgW1SrIJVRP~41UtubvjcQ1x3c~IqAgA6LX2dQeQOUbPvbg3taJ-aK6EpWz7q8x15ikMHvBUAp3yZ0PcioFRKPUqg7nECE-DllG~DarkoYUepp8ui68rcN01kew0-d-xJm7ks8sA80-U11WK5XYhnoJr9FvLUjUq3WnVWQgLPxgfzDewD4soXWWZ2LQ~6emK5sQou5BJl5Mn2HDupI-Jg8ac3lRcjWPVQ7azVqAy~Og__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_2160": null,
+            "h264_360": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_360.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.mp4%22&Expires=1656428849&Signature=EmKeXI70sqKyhSXd5WMh8IJltweA7PhGs5pAV4vajY-JM8TP7xOL0UP1-H1HmSZEx9zHbVd2yZYc2O930C57dBvRtcJ~koWsFC2fEXczjnRJn7syWIfZqr74AOzyvEqgNVVUQS77katlDFGbxWk3jnMkoc1J3weDzCY7f-zseHwOafQXamM5xLfGwa31fhf6vpKgr2w~4pmfovBwFTEZKF9D0iO45P-5GJuxt1AL6Ku3aDjE7vc7~J9c-CcglpkESEW-YX8EPwYtKSYIHIu~jYAHAnk6rKZCi8PkKseD~VxisHkTW0eeGzjR8UXPVzSL-finv3NgIT0gl3-y3QnP0A__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_540": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_540.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.mp4%22&Expires=1656428849&Signature=MHEn8GJYNC73963QCyTVJhXr-qEpSfzz0kgXo0~~ddVuriVUhDDb03Ditq6NC8zhRn2bxtGSqhaIyruvxV8kOFhtueBtxo-sXu2hKCFYnJkUpIUZa38dMU6LheMkK~U-rHOjLEjse1EAskeQvxAplxZKmCFdv-1g0Hv3Hzo9g8MwD~u08d~W7LhhyQ3jJAfugEz5k26JkuSoQ1Nnf28agT-5Lh2XUKdgG~yCkpVhKH~HEyllI64KSeFvkc~la6IbBJ7gcxCG3WvDwFno3pz3EiI8hYCxpLmZ3I-ixBeQHBW4DHqt-bjjqnv7uznnXmol0kmJBwCyjun~KKOnuyt3kw__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "h264_720": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_720.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.mp4%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.mp4%22&Expires=1656428849&Signature=mJXhcYE3eSnkj4h06Fpb4LVIusSO~oxG3jj6Jdx~zoRY-CLqM-QEAG0S9ClR2PaKxmT9mQj3rw5NPRhzP3dL-Ip2DJAT05tDCHF4GY~9AksL9-Sl0Rg94~uxCtMwrV4OAmjSOW7jaOXaTs5TC400kHwJ-O4H9cXXt9QqVeZHCtOMSKCHiGIKcxxwSu1ixirKZYgxcEnE0pTMfdZMNnWVHka1mwwJfvoT6xTWXnAy19Y71nUyVyFEwQ3V77qf4iHK~zw2gkp~~jpt0IC1syMdIGtQj8IE~Hy4DAcWAMcKswPS~PRai8xm9B2ux1NLzQhh7d5KbDTDNYKcMlEldvC0SA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "image_full": "https://assets.frame.io/image/f6dcdc8a-66a4-4126-8e24-eafba367ae65/image_full.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.jpg%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.jpg%22&Expires=1656428849&Signature=pejf8Tyqr9PNRJsHxq9wD1MqPttRKj9Q78-zQdxxQ0Ftv6E7zRZH~4yW-OkYRkGP4vmUG5lHIQYWuzS72G3r0oAP7p8j~OjEGh456y3JdiVfytk23KOTjrDjNePbjqnkSi8jLnt-jalAKmYkYWQnq5teOSZ1qfdyUQ7n9MhGux1fZ7VAmaf~uM3~XNMdxBtFNpxvL2yPehux2f-THb47PKUxqKz4btNESLD~5UemRBZhQfPfMEHJR9hp6~2lYDC61s1SeoXnSJ-GNJea3prHrA5tee6d~Jsy7Gj9-oRtCULgImh-cFgqwbzoVFfdYC3lLkpWXzfxFIlQc47pxAavCA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+            "image_high": null,
+            "image_small": "https://assets.frame.io/image/f6dcdc8a-66a4-4126-8e24-eafba367ae65/image_small.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&response-content-disposition=attachment%3B+filename%3D%22Full+Spot+-+Ungraded.jpg%22%3B+filename%2A%3D%22Full+Spot+-+Ungraded.jpg%22&Expires=1656428849&Signature=C6F7tnR9ih2MogjUK0Pdqhc6SLr9dJmwuZeLGR~UPHK2JNIycKwBYG7xLtKnQYi7Vj0JYa4~BD-99~p0pCDWFQcaG479aKTBcDg-JXi98ocJ1NoWSGBkGnoMbDsr~KdJ65u06I0t9AVP9o-iB~-i~zRasWjqVKG3Wj95QavIGrawLM0njMMmFFRNdntRk3D7UuyE71yDEvXB4wmC4uEWFbg~AeyUUR72YPwYGObQQNcbzWTlkb3AQ3wYy~~k39I44HUeSh0AySoz15gHFHnGDCEQdp3DjjxVV3-gnrOcwicO8eWURbS92JFzg98QSQb~zIhCzAZuC~Ah56YiZrEYiw__&Key-Pair-Id=K1XW5DOJMY1ET9"
+        },
+        "autoversion_id": null,
+        "upload_failed_at": null,
+        "audio_tracks": null,
+        "comment_count": 0,
+        "source": null,
+        "metadata_flags": null,
+        "status": "transcoded",
+        "hard_deleted_at": null,
+        "private": false,
+        "cover": "https://assets.frame.io/video-cover/f6dcdc8a-66a4-4126-8e24-eafba367ae65/cover.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=OeFgN4Bi~N0WBk46wTg6cpg6CgKVxslfbhgN606Jq-2MH0APIIB~ypj4cBQxPhzDLCj4pYuQuXewGegNqGlvUd8PuO8XRbF-KowAGznzISfZqRdoSttJah8izjLRfvWxj9Ps-lfSrHvArSUt3ekKWCs1T0ihRwQM54CvNUhi-mGRf8uuF42ENCVCSCa3y9dUodmkG0Slo9g3Rc0qmB26fEt171rjyFOt85FXHiemYDoVBnTlPx0knI~-I6-0wV1TrNtKQ458ZJRxbIgOvpj-sg7vfpf4n2CBAaQ-ZN7MESdTeM~Q0AwSgYMPbWwlD2DLs24k-5HqX~78v8OziE6jWA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "account_id": "dc126e4d-8297-492a-a811-b7fb795091c0",
+        "page_small": null,
+        "type": "file",
+        "creator_id": "c36e05d8-6bad-42ed-ae7a-c922ac7157b1",
+        "frame_cover": null,
+        "filetype": "video/mp4",
+        "copy": true,
+        "_type": "file",
+        "asset_type": "stream",
+        "transcoded_at": "2019-01-31T21:05:33.010206Z",
+        "page_thumb": null,
+        "checksums": null,
+        "parent_id": "7914367f-dd59-4123-a394-6f0f56f95d40",
+        "h264_720": "https://assets.frame.io/encode/f6dcdc8a-66a4-4126-8e24-eafba367ae65/h264_720.mp4?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=jGjRbPfFamGQ9KTcdp~h-ciRdYTEzFsFNJA3~L4fERT~hKEfEfGX7aVfseIxVpuosd0Wt4loSw7v4JQf8i79ydCpPLmH7XQ2U0cj9dXDxrE1CgvxQAKiYwfocQpQ4Ozhe74vQr1pNgLu15YG5r17v92Hd37~IgMFuQBD5K0Z0J~T4OfG5lWLh61ScgBuK3Lkz7KDHhmru5bueARD5aYjG6NxAAuEc3xl0s97Ke5sWv8MJDmG8GLPK-HuXxqyYlSUGNO~Jbsm9wpITq0flvcoaxsttR3B4qQOjRBfnTppVUSL53wuR2YA5zXhV85sqY9f2qc6MQFDdlIfy2JnvMjHtA__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "is_360": false,
+        "subtitle_tracks": null,
+        "transcode_statuses":
+        {
+            "cover":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 104228,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "h264_1080_best":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 53509108,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_360":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 14743300,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_540":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 23956409,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "h264_720":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 34178145,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "image_full":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 122943,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "image_small":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 13457,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark":
+                {
+                    "image": false,
+                    "text": false
+                },
+                "width": null
+            },
+            "thumb":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 8710,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "thumb_540":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 649050,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            },
+            "thumb_scrub":
+            {
+                "codec": null,
+                "duration": null,
+                "encode_status": "success",
+                "encode_time": null,
+                "error": null,
+                "filesize": 203410,
+                "fps": null,
+                "height": null,
+                "language": null,
+                "num_channels": null,
+                "num_frames": null,
+                "storage_class": "regular",
+                "watermark": null,
+                "width": null
+            }
+        },
+        "upload_completed_at": "2019-01-31T21:04:24.207854Z",
+        "frames": 2037,
+        "index": -1.0,
+        "duration": 85.013333,
+        "filesize": 478244958,
+        "properties": null,
+        "h264_2160": null,
+        "image_high": null,
+        "webm_540": null,
+        "webm_720": null,
+        "includes":
+        [
+            "video",
+            "audio"
+        ],
+        "is_session_watermarked": false,
+        "archive_from": "2022-06-10T15:32:06.228191Z",
+        "transcodes":
+        {
+            "_type": "transcode_state",
+            "codec": "AVC",
+            "id": "81738953-5097-4bdb-b8a5-bf7970b52d6e",
+            "original_height": 1080,
+            "original_width": 1920,
+            "resolutions":
+            [
+                1080,
+                720,
+                540,
+                360
+            ],
+            "thumb_height": 135,
+            "thumb_state": "media",
+            "thumb_width": 240,
+            "thumbs": 50,
+            "total_audio_tracks": null
+        },
+        "project":
+        {
+            "_type": "project",
+            "archive_status": "standard",
+            "archived_at": null,
+            "archived_file_count": 0,
+            "archived_storage": 0,
+            "collaborator_count": 1,
+            "deleted_at": null,
+            "description": null,
+            "file_count": 1,
+            "folder_count": 0,
+            "id": "cfab72d4-9063-4d9c-824c-2029d66459b5",
+            "ignore_archive": false,
+            "inserted_at": "2022-06-10T15:32:06.178628Z",
+            "invite_url": null,
+            "name": "Demo Project",
+            "owner_id": "824a974c-35c8-4283-8e41-bb31ad95e753",
+            "private": false,
+            "read_only": false,
+            "resource_id": null,
+            "root_asset_id": "db517e54-e8d5-4d56-aff5-6b2f7cadd1d5",
+            "shared": false,
+            "storage": 10546620,
+            "team_id": "c2f142e8-fca8-438c-a6be-dc98c2ba5845",
+            "updated_at": "2022-06-10T15:32:36.219070Z",
+            "user_permissions":
+            {
+                "can_download": true,
+                "can_manage_devices": true,
+                "can_modify_template": false,
+                "can_public_share_presentation": true,
+                "can_public_share_review_link": true,
+                "can_share_downloadable_presentation": true,
+                "can_share_downloadable_review_link": true,
+                "can_share_unwatermarked_presentation": true,
+                "can_share_unwatermarked_review_link": true,
+                "can_view_devices": true
+            }
+        },
+        "resource_id": null,
+        "image_small": "https://assets.frame.io/image/f6dcdc8a-66a4-4126-8e24-eafba367ae65/image_small.jpg?x-amz-meta-resource_id=45184b16-1a84-42ba-9743-6ff44b893e2f&x-amz-meta-resource_type=asset&x-amz-meta-request_id=FvyCroEyf3e7fkIFzbCD&x-amz-meta-project_id=cfab72d4-9063-4d9c-824c-2029d66459b5&Expires=1656428849&Signature=ecbwZTr6dE-yA1uhTqbdwDT7fhdDSQiAR2d27lkL0iC9re1D9DxsL7tQm1Mg5r5HVOd8ZqQOmvXSqDMizeiFDp4lXUiEC0RGy-Xid2q8mKLBcuj3X9zxvPeiCf1Tcl9aRNMxvlJdvPWJjDhrhowP9G3269hIFGdvb5LSUM9YpI~lAK20QOVxScpF4-tMJt6pkB7yVXqAVFOzH82vhnCS66S7tVxBHIIYt9~bz8bhYWGXhj-tXw1DMD~wBEmKB3oqiu-7FpLA~VX2ZzoXebYUhSuzHIi1VUD0w7a7zFjNIqx2qDRF1MzafG7OxTC~As-j94ZSw-iM4i16RSQQ9H9dOg__&Key-Pair-Id=K1XW5DOJMY1ET9",
+        "page_high": null,
+        "is_hls_required": false,
+        "timecode": null
+    }
+]

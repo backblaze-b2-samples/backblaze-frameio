@@ -1,10 +1,28 @@
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
+const express = require('express');
+const stream = require('stream');
+
+const app = express();
+app.use(express.json()) 
+
+app.post('/', (req, res) => {
+
+  console.log('print ' + JSON.stringify(req.body));
+  
+  let entryResponse = entryPoint(req.body);
+  res.json({requestBody: entryResponse}); 
+
+  //res.send('Hello World!')
+})
+
+app.listen(8675, () => console.log('Server is up and running'));
+
 
 async function fetchAssetInfo (id) {
 
     const token = process.env.FRAMEIO_TOKEN;
-
+    console.log("asset id: " + id)
     let path = `https://api.frame.io/v2/assets/${id}`;
     let requestOptions = {
       method: 'GET',
@@ -13,15 +31,16 @@ async function fetchAssetInfo (id) {
         'Authorization': `Bearer ${token}`
       }
     };
+    console.log("asset path: " + path)
+
     try {
         let response = await fetch(path, requestOptions);
         let result = await response.json();
-        console.log(`undefined = 1 object, otherwise multiple: ${result.length}`);
-        //console.log('result: ' + JSON.stringify(result, null, 2));
-        //console.log(`length: ${Object.keys(result).length}`);
+
+        console.log(`if defined, more than one item: ${result.length}`);
 
         if (result._type == 'version_stack') {
-            console.log(`version_stack detected: ${result.id})`);
+            console.log(`version_stack detected, processing stack: ${result.id})`);
             let {url, name} = await fetchAssetInfo(result.id + '/children');
             //console.log('in stack ' + JSON.stringify(versionStack));
             console.log("version_stack processing finished");
@@ -62,8 +81,10 @@ async function fetchAssetInfo (id) {
     }
 }
 
-function invokeUploader (url, name) { 
+async function invokeUploader (url, name) { 
 
+    // TODO some if AWS then else logic. 
+    /*
     const lambda = new AWS.Lambda();
 
     let req = {
@@ -74,14 +95,68 @@ function invokeUploader (url, name) {
             name: name })
     };
 
-    return lambda.invoke(req).promise();
+    return lambda.invoke(req).promise();*/
+
+    console.log(`upload triggered: ${name}...`);
+    try {
+        const { writeStream, promise } = b2Uploader({ name, url });
+
+        fetch(url)
+            .then(response => {
+                response.body.pipe(writeStream);
+        });
+
+        try {
+            await promise;
+            console.log('upload completed successfully');
+        } catch (error) {
+            console.log('upload failed.', error.message);
+        }
+
+    } catch(err) {
+        throw (`upload failed error: ${err}`);
+    }
+    
+    return (console.log(`Done uploading ${name}!`));
 }
 
-exports.handler = async function (event, context) {
-    //const caller = context.functionName;
-    console.log(JSON.stringify(event));
-    
-    let id = JSON.parse(event.body).resource.id;
+const b2Uploader = ({ name, url }) => {
+
+    var endpoint = new AWS.Endpoint('https://' + process.env.BUCKET_ENDPOINT);
+
+    const s3 = new AWS.S3({
+        endpoint: endpoint, 
+        region: 'us-west-004',
+        customUserAgent: 'b2-node-docker-0.2',
+        secretAccessKey: process.env.SECRET_KEY, 
+        accessKeyId: process.env.ACCESS_KEY
+    });
+
+    const pass = new stream.PassThrough();
+
+    try {
+        return { 
+            writeStream: pass, 
+            promise: s3.upload({ 
+                Bucket: process.env.BUCKET_NAME, 
+                Key: name, 
+                Body: pass,
+                Metadata: {
+                    frameio_origname: name,
+                    frameio_origurl: url,
+                    b2_keyid: process.env.SECRET_KEY 
+                },
+            }).promise()
+        };
+    } catch(err) {
+        console.log(`b2uploader failed : ${err}`)
+        throw (`b2uploader failed : ${err}`);
+    }
+};
+
+async function entryPoint (event) {
+
+    let id = event.id;
     let { url, name} = await fetchAssetInfo(id);
 
     try {
@@ -111,6 +186,6 @@ exports.handler = async function (event, context) {
 
     } catch(err) {
         console.log(`ERROR Hit a problem: ${err.message}`);
-        return err;
+        throw err;
     }
 };
