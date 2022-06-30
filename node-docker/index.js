@@ -14,16 +14,15 @@ app.post('/', (req, res) => {
 
     // make sure the environment variables are set.
     envVars.forEach(element => {
-        let envVar = 'process.env.' + element;
-        console.log(`checking ${envVar} ${element} : ${process.env[element]}`);
-        console.log(process.env.FRAMEIO_TOKEN);
+        console.log(`checking ${element} is set`);
         if (!process.env[element]) {
             throw(`ERROR: Environment variable ${element} not properly set`);
         };
     });
     
     let entryResponse = entryPoint(req.body);
-    res.status(entryResponse.statusCode);
+    console.log(`status checking ${JSON.stringify(entryResponse.statusCode)} `);
+    res.status(entryResponse.statusCode || 202);
     res.json(entryResponse.body);
     
 });
