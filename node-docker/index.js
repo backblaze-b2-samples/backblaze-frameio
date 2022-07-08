@@ -1,7 +1,7 @@
-const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 const express = require('express');
 const stream = require('stream');
+const AWS = require('aws-sdk');
 var crypto = require('crypto');
 
 const envVars = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
@@ -74,20 +74,6 @@ async function fetchAssetInfo (id) {
 
 async function invokeUploader (url, name) { 
 
-    // TODO some if AWS then else logic. 
-    /*
-    const lambda = new AWS.Lambda();
-
-    let req = {
-        FunctionName: 'upload-to-b2',
-        InvocationType: 'Event', // returns statusCode 202 on success. See invoke() SDK for info
-        Payload: JSON.stringify({
-            url: url, 
-            name: name })
-    };
-
-    return lambda.invoke(req).promise();*/
-
     console.log(`upload triggered: ${name}...`);
 
     try {
@@ -159,16 +145,16 @@ app.use(express.json());
 
 app.post('/', async (req, res) => {
 
-    console.log('print ' + JSON.stringify(req.body));
-    console.log('headers ' + JSON.stringify(req.headers));
+    //console.log('body: ' + JSON.stringify(req.body));
+    //console.log('headers: ' + JSON.stringify(req.headers));
 
     let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
 
-    console.log(matchingHMAC(sigString));
-    console.log("v0=" + req.header("X-Frameio-Signature"));
+    //console.log(matchingHMAC(sigString));
+    //console.log("v0=" + req.header("X-Frameio-Signature"));
     if (("v0=" + matchingHMAC(sigString)) != (req.header("X-Frameio-Signature"))) {
         res.status(403);
-        res.json({'error': 'prohibited. mismatched hmac'});
+        res.json({'error': 'mismatched hmac'});
         return;
     };
 
@@ -176,7 +162,7 @@ app.post('/', async (req, res) => {
     envVars.forEach(element => {
         console.log(`checking ${element} is set`);
         if (!process.env[element]) {
-            throw(`ERROR: Environment variable ${element} not properly set`);
+            throw(`Environment variable ${element} not set`);
         };
     });
 
@@ -194,14 +180,14 @@ app.post('/', async (req, res) => {
             res.status(202);
             res.json({
                     'title': 'Job rejected.',
-                    'description': `${url} not currently supported.`
+                    'description': `${url} not supported.`
             });
         } else {
 
             res.status(202);
             res.json({
                 'title': 'Job received!',
-                'description': `Your archive job for '${name}' has been triggered.`
+                'description': `Archive job for '${name}' has been triggered.`
             });
         };
 
