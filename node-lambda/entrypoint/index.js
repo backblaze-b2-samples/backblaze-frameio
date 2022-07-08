@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
+var crypto = require('crypto');
 
 async function fetchAssetInfo (id) {
 
@@ -77,10 +78,27 @@ function invokeUploader (url, name) {
     return lambda.invoke(req).promise();
 }
 
+function matchingHMAC (stringToHash) {
+    var hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
+    console.log(stringToHash);
+    data = hmac.update(stringToHash);
+    gen_hmac = data.digest('hex');
+    console.log("hmac:" + gen_hmac);
+    return(gen_hmac);
+};
+
 exports.handler = async function (event, context) {
     //const caller = context.functionName;
     console.log(JSON.stringify(event));
     
+    let sigString = 'v0:' + event.headers['X-Frameio-Request-Timestamp'] + ':' + JSON.stringify(event.body);
+
+    console.log(matchingHMAC(sigString));
+    console.log("v0=" + event.headers['X-Frameio-Request-Timestamp']);
+    if (("v0=" + matchingHMAC(sigString)) != (event.headers['X-Frameio-Request-Timestamp'])) {
+        return('error prohibited. mismatched hmac');
+    };
+
     let id = JSON.parse(event.body).resource.id;
     let { url, name} = await fetchAssetInfo(id);
 
