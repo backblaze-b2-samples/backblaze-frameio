@@ -6,28 +6,6 @@ const stream = require('stream');
 const envVars = ['FRAMEIO_TOKEN', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
 
 const app = express();
-app.use(express.json()); 
-
-app.post('/', (req, res) => {
-
-    //console.error('print ' + JSON.stringify(req.body));
-
-    // make sure the environment variables are set.
-    envVars.forEach(element => {
-        console.log(`checking ${element} is set`);
-        if (!process.env[element]) {
-            throw(`ERROR: Environment variable ${element} not properly set`);
-        };
-    });
-    
-    let entryResponse = entryPoint(req.body);
-    console.log(`status checking ${JSON.stringify(entryResponse.statusCode)} `);
-    res.status(entryResponse.statusCode || 202);
-    res.json(entryResponse.body);
-    
-});
-
-app.listen(8675, () => console.log('Server ready and listening'));
 
 async function fetchAssetInfo (id) {
 
@@ -53,26 +31,25 @@ async function fetchAssetInfo (id) {
         console.log(`if defined, more than one item: ${result.length}`);
 
         if (result._type == 'version_stack') {
-            console.log(`version_stack detected, processing stack: ${result.id})`);
-            let {url, name} = await fetchAssetInfo(result.id + '/children');
-
-            console.log("version_stack processing finished");
-            return { url: '', name: "Version Stack named: " + result.name }; // using empty url value for logic in main
+            console.log(`version_stack detected, processing stack: ${result.id}`);
+            return {url, name} = await fetchAssetInfo(result.id + '/children');
         }
 
-        if ( result.length ) { // more than one result means it's a folder or version_stack and we need to iterate
+        if (result.length) { // more than one result means it's a folder or version_stack and we need to iterate
             for (const item of Object.keys(result)) {
                     console.log(`version_stack child item type: ${result[item]._type}`);
                     if (result[item]._type == 'file') {
                         console.log(`version_stack child upload : ${result[item].name} `);
-                        await invokeUploader(result[item].original, result[item].name);
+                        invokeUploader(result[item].original, result[item].name);
                     } else {
                         console.log("version_stack child type not supported, or not found");
                         //console.log(`version_stack child full :` + JSON.stringify(item, null, 2));
                         throw `archiveType: ${result[item]} version_stack child unknown or project_id : ${result[item].project_id} not found `;
                     }
             }
-            return{};
+            console.log("version_stack processing finished");
+            return { url: '', name: "Version Stack" }; // using empty url value for logic in main
+
 
         } else {
             console.log(`begin typing: ${result._type}`);
@@ -92,7 +69,7 @@ async function fetchAssetInfo (id) {
         }
         return (`error: ${err}`);
     }
-}
+};
 
 async function invokeUploader (url, name) { 
 
@@ -111,6 +88,7 @@ async function invokeUploader (url, name) {
     return lambda.invoke(req).promise();*/
 
     console.log(`upload triggered: ${name}...`);
+    //return 
     try {
         const { writeStream, promise } = b2Uploader({ name, url });
 
@@ -131,7 +109,7 @@ async function invokeUploader (url, name) {
     }
     
     return (console.log(`Done uploading ${name}!`));
-}
+};
 
 const b2Uploader = ({ name, url }) => {
 
@@ -167,38 +145,52 @@ const b2Uploader = ({ name, url }) => {
     }
 };
 
-async function entryPoint (event) {
+app.use(express.json()); 
 
-    let id = event.id;
+app.post('/', async (req, res) => {
+
+    console.log('print ' + JSON.stringify(req.body));
+    console.log('headers ' + JSON.stringify(req.headers))
+    // make sure the environment variables are set.
+    envVars.forEach(element => {
+        console.log(`checking ${element} is set`);
+        if (!process.env[element]) {
+            throw(`ERROR: Environment variable ${element} not properly set`);
+        };
+    });
+
+    let id = req.body.resource.id;
     let { url, name} = await fetchAssetInfo(id);
 
+    console.log(`url is ${url}`);
+    console.log(`name is ${name}`);
     try {
         if ( typeof url !== 'undefined' && url ) {
-            await invokeUploader(url, name);
+            invokeUploader(url, name);
         }
 
-        if ( url.startsWith("archiveType: ")) {
-            let returnPayload = {
-                statusCode: 202, 
-                body: JSON.stringify({
-                    'title': `Job rejected.`,
+        if ( url.startsWith("archiveType:")) {
+            res.status(202);
+            res.json({
+                    'title': 'Job rejected.',
                     'description': `Only "file" archive is currently implemented, not ${url}. Coming soon!`
-                })
-            };
-            return returnPayload;
-        }
+            });
+        } else {
 
-        let returnPayload = {
-            statusCode: 202, 
-            body: JSON.stringify({
-                'title': `Job received!`,
+            res.status(202);
+            res.json({
+                'title': 'Job received!',
                 'description': `Your archive job for '${name}' has been triggered.`
-            })
+            });
         };
-        return returnPayload;
 
     } catch(err) {
         console.log(`ERROR Hit a problem: ${err.message}`);
+        res.status(500);
+        res.json(`ERROR: ${err.message}`);
         throw err;
     }
-};
+    
+});
+
+app.listen(8675, () => console.log('Server ready and listening'));
