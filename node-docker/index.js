@@ -2,8 +2,9 @@ const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 const express = require('express');
 const stream = require('stream');
+var crypto = require('crypto');
 
-const envVars = ['FRAMEIO_TOKEN', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
+const envVars = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
 
 const app = express();
 
@@ -88,7 +89,7 @@ async function invokeUploader (url, name) {
     return lambda.invoke(req).promise();*/
 
     console.log(`upload triggered: ${name}...`);
-    //return 
+
     try {
         const { writeStream, promise } = b2Uploader({ name, url });
 
@@ -145,12 +146,32 @@ const b2Uploader = ({ name, url }) => {
     }
 };
 
+function matchingHMAC (stringToHash) {
+    var hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
+    console.log(stringToHash);
+    data = hmac.update(stringToHash);
+    gen_hmac = data.digest('hex');
+    console.log("hmac:" + gen_hmac);
+    return(gen_hmac);
+};
+
 app.use(express.json()); 
 
 app.post('/', async (req, res) => {
 
     console.log('print ' + JSON.stringify(req.body));
-    console.log('headers ' + JSON.stringify(req.headers))
+    console.log('headers ' + JSON.stringify(req.headers));
+
+    let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
+
+    console.log(matchingHMAC(sigString));
+    console.log("v0=" + req.header("X-Frameio-Signature"));
+    if (("v0=" + matchingHMAC(sigString)) != (req.header("X-Frameio-Signature"))) {
+        res.status(403);
+        res.json({'error': 'prohibited. mismatched hmac'});
+        return;
+    };
+
     // make sure the environment variables are set.
     envVars.forEach(element => {
         console.log(`checking ${element} is set`);
@@ -173,7 +194,7 @@ app.post('/', async (req, res) => {
             res.status(202);
             res.json({
                     'title': 'Job rejected.',
-                    'description': `Only "file" archive is currently implemented, not ${url}. Coming soon!`
+                    'description': `${url} not currently supported.`
             });
         } else {
 
