@@ -8,7 +8,7 @@ const envVars = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_N
 
 
 async function fetchAssetInfo (id) {
-    // get asset info based on the id from frame.io
+    // get asset info based on the id from Frame.io
     const token = process.env.FRAMEIO_TOKEN;
 
     console.log('asset id: ', id)
@@ -30,37 +30,36 @@ async function fetchAssetInfo (id) {
 
         console.log('number of items: ', result.length);
 
-        if (result._type == 'version_stack') {
-            console.log('version_stack id: ', result.id);
+        if (result.type != 'file' && result.type != undefined) {
+            console.log(result.type, ' with id: ', result.id);
             // recursively call to iterate over children
             return {url, name} = await fetchAssetInfo(result.id + '/children');
         }
 
         if (result.length) { // more than one result means it's a folder or version_stack and we need to iterate
             for (const item of Object.keys(result)) {
-                    console.log('version_stack child type: ', result[item]._type);
-                    if (result[item]._type == 'file') {
-                        console.log('version_stack child uploading: ', result[item].name);
+                    console.log(result[item].type, ' child name : ', result[item].name);
+                    if (result[item].type == 'file') {
                         streamUpload(result[item].original, result[item].name);
                     } else {
-                        console.log('version_stack child type unknown');
-                        //console.log(`version_stack child contains :` + JSON.stringify(item, null, 2));
-                        throw `archiveType: ${result[item]} version_stack child unknown or project_id : ${result[item].project_id} not found `;
+                        console.log(result.type, ' child type is unknown'); // we shouldn't hit this due to the recursive if above
+                        //console.log(result.type, ' child contains : ', JSON.stringify(item, null, 2));
+                        throw 'archiveType: ', result[item], ' child unknown or project_id : ', result[item].project_id, 'not found';
                     }
             }
-            console.log('version_stack completed');
-            return { url: '', name: 'Version Stack' }; // using empty url value for logic in main
+            console.log('completed processing multi-item stack');
+            //return { url: '', name: result[0].name }; // using empty url value for logic in main
 
 
-        } else {
-            console.log('begin typing: ', result._type);
-            if (result._type == 'file') {
+        } else { // only a single result
+            console.log('begin typing: ', result.type);
+            if (result.type == 'file') {
                 console.log('item is file type: ', result.name);
                 return { url: result.original, name: result.name };
             } else {
                 console.log('type not supported, or not found');
                 //console.log(`printout full :` + JSON.stringify(result, null, 2));
-                throw `archiveType: ${result._type} unknown or project_id : ${result.project_id} not found `;
+                throw `archiveType: ${result.type} unknown or project_id : ${result.project_id} not found `;
             }
         }
     } catch(err) {
@@ -74,7 +73,7 @@ async function fetchAssetInfo (id) {
 
 async function streamUpload (url, name) { 
 
-    console.log('upload triggered: ', name);
+    console.log('upload begin: ', name);
 
     try {
         const { writeStream, promise } = createWriteStream(url, name);
@@ -82,6 +81,11 @@ async function streamUpload (url, name) {
         fetch(url)
             .then(response => {
                 response.body.pipe(writeStream);
+        });
+
+        promise.on('httpUploadProgress', (progress) => {
+            console.log(name, 'progress', progress)
+            // { loaded: 6472, total: 345486, part: 3, key: 'large-file.dat' }
         });
 
         try {
@@ -119,8 +123,9 @@ const createWriteStream = (url, name) => {
                 Bucket: process.env.BUCKET_NAME, 
                 Key: name, 
                 Body: pass,
+                ChecksumAlgorithm: "SHA1",
                 Metadata: {
-                    frameio_origname: name,
+                    frameio_name: name,
                     frameio_origurl: url,
                     b2_keyid: process.env.SECRET_KEY 
                 },
@@ -164,9 +169,9 @@ function checkEnvVars (req, res, next) {
 };
 
 function frameSignatureCheck (req, res, next) {
-    // check signature for frameio
+    // check signature for Frame.io
     try {
-        // frame.io signature format is 'v0:timestamp:body'
+        // Frame.io signature format is 'v0:timestamp:body'
         let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
 
         //console.log(calcHMAC(sigString));
@@ -202,7 +207,7 @@ app.post('/', [frameSignatureCheck, checkEnvVars], async (req, res) => {
             streamUpload(url, name);
         }
 
-        // send a 200 on rejection so frameio will display the msg
+        // send a 200 on rejection so Frame.io will display the msg
         if ( url.startsWith("archiveType:")) {
             res.status(200).json({
                 'title': 'Job rejected.',
