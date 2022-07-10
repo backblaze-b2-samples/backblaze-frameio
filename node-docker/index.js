@@ -7,13 +7,15 @@ var crypto = require('crypto');
 const envVars = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
 
 
-async function fetchAssetInfo (id) {
+async function getIdInfo (origReq, fileTree='') {
     // get asset info based on the id from Frame.io
     const token = process.env.FRAMEIO_TOKEN;
 
-    console.log('asset id: ', id)
+    let resource = origReq.body.resource;
+    let data = origReq.body.data;
+    //console.log('asset id: ', resource.id);
 
-    let path = `https://api.frame.io/v2/assets/${id}`;
+    let path = `https://api.frame.io/v2/assets/${resource.id}`;
     let requestOptions = {
       method: 'GET',
       headers: {
@@ -22,70 +24,75 @@ async function fetchAssetInfo (id) {
       }
     };
 
-    console.log('asset path: ', path)
+    // console.log('asset path: ', path)
 
     try {
-        let response = await fetch(path, requestOptions);
-        let result = await response.json();
+        let r = await fetch(path, requestOptions);
+        let result = await r.json();
 
-        console.log('number of items: ', result.length);
+        console.log('quantity ', result.length);
 
-        if (result.type != 'file' && result.type != undefined) {
-            console.log(result.type, ' with id: ', result.id);
-            // recursively call to iterate over children
-            return {url, name} = await fetchAssetInfo(result.id + '/children');
+        // if 'project' selected, run this once to initiate a top level project recursion
+        if (data.depth == "project" && ! data.initiated) {
+            resource.id = result.project.root_asset_id + '/children';
+            fileTree = result.project.name;
+            data.initiated = 1;
+            return { name } = await getIdInfo(origReq, fileTree + '/');
+        };
+
+        // handle folders and version stacks etc
+        if (result.type == 'version_stack' || result.type == 'folder') {
+            resource.id = result.id + '/children';
+            fileTree +=  result.name;
+            await getIdInfo(origReq, fileTree + '/');
         }
 
-        if (result.length) { // more than one result means it's a folder or version_stack and we need to iterate
-            for (const item of Object.keys(result)) {
-                    console.log(result[item].type, ' child name : ', result[item].name);
-                    if (result[item].type == 'file') {
-                        streamUpload(result[item].original, result[item].name);
+        // more than one result means it's a folder or version_stack and we need to iterate
+        if (result.length) { 
+            for (const i of Object.keys(result)) {
+                    console.log(result[i].type, 'named :', result[i].name);
+                    if (result[i].type == 'file') {
+                        streamUpload(result[i].original, fileTree + result[i].name);
+                    } else if (result[i].type == 'version_stack' || result[i].type == 'folder') {
+                        resource.id = result[i].id + '/children';
+                        await getIdInfo(origReq, fileTree  + result[i].name + '/');            
                     } else {
-                        console.log(result.type, ' child type is unknown'); // we shouldn't hit this due to the recursive if above
-                        //console.log(result.type, ' child contains : ', JSON.stringify(item, null, 2));
-                        throw 'archiveType: ', result[item], ' child unknown or project_id : ', result[item].project_id, 'not found';
-                    }
+                        console.log(result.type, 'type is unknown'); // we shouldn't hit this due to the recursive if above
+                        return { name: 'error: it seems like an unknown type' + fileTree + '/' + result.name }
+                    };
             }
             console.log('completed processing multi-item stack');
-            //return { url: '', name: result[0].name }; // using empty url value for logic in main
+            return { name: fileTree };
 
-
-        } else { // only a single result
-            console.log('begin typing: ', result.type);
+        // this will only trigger if the POST is only a single asset, no folders or stacks
+        } else { 
             if (result.type == 'file') {
-                console.log('item is file type: ', result.name);
-                return { url: result.original, name: result.name };
+                console.log('file type: ', result.name);
+                streamUpload(result.original, fileTree + result.name);
+                return { name: result.name };
             } else {
                 console.log('type not supported, or not found');
                 //console.log(`printout full :` + JSON.stringify(result, null, 2));
-                throw `archiveType: ${result.type} unknown or project_id : ${result.project_id} not found `;
+                return { name: 'error: it seems like an unknown type' + fileTree + '/' + result.name }
             }
         }
     } catch(err) {
         console.log('error received: ', err);
-        if ( err.startsWith("archiveType: ") ) {
-            return { url: err };
-        }
-        return (`error: ${err}`);
+        return { name: err };
+        //return (`error: ${err}`);
     }
 };
 
 async function streamUpload (url, name) { 
 
     console.log('upload begin: ', name);
-
+    return (console.log('Done uploading: ', name)); // todo
     try {
         const { writeStream, promise } = createWriteStream(url, name);
 
         fetch(url)
             .then(response => {
                 response.body.pipe(writeStream);
-        });
-
-        promise.on('httpUploadProgress', (progress) => {
-            console.log(name, 'progress', progress)
-            // { loaded: 6472, total: 345486, part: 3, key: 'large-file.dat' }
         });
 
         try {
@@ -126,7 +133,6 @@ const createWriteStream = (url, name) => {
                 ChecksumAlgorithm: "SHA1",
                 Metadata: {
                     frameio_name: name,
-                    frameio_origurl: url,
                     b2_keyid: process.env.SECRET_KEY 
                 },
             }).promise()
@@ -152,7 +158,24 @@ function calcHMAC (stringToHash) {
     }
 };
 
-function checkEnvVars (req, res, next) {
+function checkFrameSig (req, res, next) {
+    // check signature for Frame.io
+    try {
+        // Frame.io signature format is 'v0:timestamp:body'
+        let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
+
+        //check to make sure the signature matches, or finish
+        if (("v0=" + calcHMAC(sigString)) != (req.header("X-Frameio-Signature"))) {
+            return res.status(403).json({'error': 'mismatched hmac'});
+        };
+        return next();
+    } catch(err) {
+        console.log('ERROR checkFrameSig: ', err.message);
+        throw new Error(err);
+    };
+};
+
+function checkEnvVars () {
     // make sure the environment variables are set
     try {
         envVars.forEach(element => {
@@ -161,64 +184,103 @@ function checkEnvVars (req, res, next) {
                 throw('Environment variable: ', element);
             };
         });
-        next();
     } catch(err) {
         console.log('ERROR checkEnvVars: ', err);
-        throw res.status(500).json({'error': 'internal configuration'});
+        throw({'error': 'internal configuration'});
     };
 };
 
-function frameSignatureCheck (req, res, next) {
-    // check signature for Frame.io
+function formProcessor (req, res, next) {
+    // check form input
     try {
-        // Frame.io signature format is 'v0:timestamp:body'
-        let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
-
-        //console.log(calcHMAC(sigString));
-        //console.log("v0=" + req.header("X-Frameio-Signature"));
-
-        //check to make sure the signature matches, or finish
-        if (("v0=" + calcHMAC(sigString)) != (req.header("X-Frameio-Signature"))) {
-            return res.status(403).json({'error': 'mismatched hmac'});
+        let data = req.body.data;
+        console.log(req.body);
+        if ( !data ) { // send user first question
+            console.log('FormProcessor: Question 1');
+            return (res.status(200).json({
+                "title": "Import or Export?",
+                "description": "Export from Frame.io -> Backblaze B2 🔥 ?\n\nor\n\nImport from 🔥 Backblaze B2 -> Frame.io ?",
+                "fields": [{
+                    "type": "select",
+                    "label": "Import or Export",
+                    "name": "copytype",
+                    "options": [{   
+                        "name": "Export from Frame.io","value": "export" },{ 
+                        "name": "Import from Backblaze B2", "value": "import" }]}]}));
         };
-        next();
+
+        if ( data.copytype ) { // send user next question
+            console.log('FormProcessor: Question 2');
+            if ( data.copytype  == "export") {
+                return (res.status(200).json({
+                    "title": "Specific Asset(s) or Whole Project?",
+                    "description": "Export the specific asset(s) selected or the entire project?",
+                    "fields": [{
+                        "type": "select",
+                        "label": "Specific Asset(s) or Entire Project",
+                        "name": "depth",
+                        "options": [{   
+                            "name": "Specific Asset(s)","value": "asset" },{ 
+                            "name": "Entire Project", "value": "project" }]}]}));
+            } else if (data.copytype  == "import") {
+                // todo : possibly limit importing the export location
+                return (res.status(200).json({
+                    "title": "Enter the location",
+                    "description": "Please enter the object or prefix to import from Backblaze. If the location is a single object we will import it. If it is a prefix we will recursively copy everything underneath it.",
+                    "fields": [{
+                        "type": "text",
+                        "label": "B2 Path",
+                        "name": "b2path"}]}));
+            } else {
+                console.log('unknown copytype received');
+                return next();
+            };
+        } else if ( data.b2path ) { // user chose import
+            // check and begin, do something with import from b2
+            console.log('do something with import')
+        } else if ( data.depth ) { // user chose export
+            // export single asset or whole project
+            if (data.depth == "asset") {
+                return next();
+            } else if  (data.depth == "project"){
+                return next();
+            };
+        } else {
+            // data not set, that shouldn't really happen at the end of this function.
+            console.log('received a message without data after sending forms')
+            return next();
+        };
     } catch(err) {
-        console.log('ERROR frameSignatureCheck: ', err.message);
+        console.log('ERROR formProcessor: ', err.message);
         throw new Error(err);
     };
-};
+}
 
 const app = express();
 app.use(express.json()); 
 
-app.post('/', [frameSignatureCheck, checkEnvVars], async (req, res) => {
+app.post('/', [checkFrameSig, formProcessor], async (req, res) => {
 
-    //console.log('body: ' + JSON.stringify(req.body));
-    //console.log('headers: ' + JSON.stringify(req.headers));
+    let { name } = await getIdInfo(req);
 
-    let id = req.body.resource.id;
-    let { url, name} = await fetchAssetInfo(id);
-
-    console.log('url: ', url);
     console.log('name: ', name);
 
     try {
-        if ( typeof url !== 'undefined' && url ) {
-            streamUpload(url, name);
-        }
+        if ( typeof name !== 'undefined' && name ) {
 
-        // send a 200 on rejection so Frame.io will display the msg
-        if ( url.startsWith("archiveType:")) {
-            res.status(200).json({
-                'title': 'Job rejected.',
-                'description': `${url} not supported.`
-            });
-        } else {
-            res.status(202).json({
-                'title': 'Job received!',
-                'description': `Archive job for '${name}' has been triggered.`
-            });
-        };
+            // send a 200 on rejection so Frame.io will display the msg
+            if ( name.startsWith("error")) {
+                res.status(200).json({
+                    'title': 'Job rejected.',
+                    'description': `${name} not supported.`
+                });
+            } else {
+                res.status(202).json({
+                    'title': 'Job received!',
+                    'description': `Archive job for '${name}' has been triggered.`
+                });
+            };
+        }
 
     } catch(err) {
         console.log('ERROR / POST: ', err.message);
@@ -227,4 +289,7 @@ app.post('/', [frameSignatureCheck, checkEnvVars], async (req, res) => {
     }
 });
 
-app.listen(8675, () => console.log('Server ready and listening'));
+app.listen(8675, () => {
+    checkEnvVars();
+    console.log('Server ready and listening');
+});
