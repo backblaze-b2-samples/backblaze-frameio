@@ -33,7 +33,7 @@ async function getIdInfo (origReq, fileTree='') {
         console.log('quantity ', result.length);
 
         // if 'project' selected, run this once to initiate a top level project recursion
-        if (data.depth == "project" && ! data.initiated) {
+        if (data.depth == 'project' && ! data.initiated) {
             resource.id = result.project.root_asset_id + '/children';
             fileTree = result.project.name;
             data.initiated = 1;
@@ -86,7 +86,6 @@ async function getIdInfo (origReq, fileTree='') {
 async function streamUpload (url, name) { 
 
     console.log('upload begin: ', name);
-    return (console.log('Done uploading: ', name)); // todo
     try {
         const { writeStream, promise } = createWriteStream(url, name);
 
@@ -130,7 +129,7 @@ const createWriteStream = (url, name) => {
                 Bucket: process.env.BUCKET_NAME, 
                 Key: name, 
                 Body: pass,
-                ChecksumAlgorithm: "SHA1",
+                ChecksumAlgorithm: 'SHA1',
                 Metadata: {
                     frameio_name: name,
                     b2_keyid: process.env.SECRET_KEY 
@@ -162,10 +161,10 @@ function checkFrameSig (req, res, next) {
     // check signature for Frame.io
     try {
         // Frame.io signature format is 'v0:timestamp:body'
-        let sigString = 'v0:' + req.header("X-Frameio-Request-Timestamp") + ':' + JSON.stringify(req.body);
+        let sigString = 'v0:' + req.header('X-Frameio-Request-Timestamp') + ':' + JSON.stringify(req.body);
 
         //check to make sure the signature matches, or finish
-        if (("v0=" + calcHMAC(sigString)) != (req.header("X-Frameio-Signature"))) {
+        if (('v0=' + calcHMAC(sigString)) != (req.header('X-Frameio-Signature'))) {
             return res.status(403).json({'error': 'mismatched hmac'});
         };
         return next();
@@ -191,7 +190,7 @@ function checkEnvVars () {
 };
 
 function formProcessor (req, res, next) {
-    // check form input
+    // frame.io callback form logic
     try {
         let data = req.body.data;
         console.log(req.body);
@@ -240,9 +239,9 @@ function formProcessor (req, res, next) {
             console.log('do something with import')
         } else if ( data.depth ) { // user chose export
             // export single asset or whole project
-            if (data.depth == "asset") {
+            if (data.depth == 'asset'"') {
                 return next();
-            } else if  (data.depth == "project"){
+            } else if  (data.depth == 'project'){
                 return next();
             };
         } else {
@@ -261,15 +260,16 @@ app.use(express.json());
 
 app.post('/', [checkFrameSig, formProcessor], async (req, res) => {
 
+    // send the data on for processing.
     let { name } = await getIdInfo(req);
 
+    name = name.replaceAll('\/', '');
     console.log('name: ', name);
 
     try {
         if ( typeof name !== 'undefined' && name ) {
-
             // send a 200 on rejection so Frame.io will display the msg
-            if ( name.startsWith("error")) {
+            if ( name.startsWith('error')) {
                 res.status(200).json({
                     'title': 'Job rejected.',
                     'description': `${name} not supported.`
