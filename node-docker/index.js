@@ -1,3 +1,30 @@
+/*
+This code reads a Custom Action POST from frame.io.
+It uses form-based callbacks within frame.io and
+supports single asset, asset stacks, and entire project
+exports to Backblaze B2.
+
+It uses a stream buffer and multipart upload functionality
+to deliver very large files with very low disk and 
+memory requirements. Network IO is generally the deciding
+factor of how fast it will operate.
+
+Current functionality includes verifying the frame.io 
+SHA256 HMAC signature with the Custom Action 'secret', 
+
+It also requires the documented environment variables
+are set or it will not start the express app. 
+
+TODO: 
+ - Import logic
+ - deny imports from the exports folder
+ - do some amount of size verification if possible
+ - uploadmanager percent stats
+ - external logging
+ - store all metadata somewhere from the fio API calls
+
+*/
+
 const fetch = require('node-fetch');
 const express = require('express');
 const stream = require('stream');
@@ -239,7 +266,7 @@ function formProcessor (req, res, next) {
             console.log('do something with import')
         } else if ( data.depth ) { // user chose export
             // export single asset or whole project
-            if (data.depth == 'asset'"') {
+            if (data.depth == 'asset') {
                 return next();
             } else if  (data.depth == 'project'){
                 return next();
