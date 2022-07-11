@@ -135,7 +135,9 @@ async function formProcessor (req, res, next) {
         } else if ( data.b2path ) { // user chose import
             console.log('sending to import processor.')
             importProcess(req);
-            
+            return (res.status(202).json({
+                    "title": "Submitted",
+                    "description": 'Submitted'}));
         } else if ( data.depth ) { // user chose export
             if (data.depth == 'asset') {
                 return next();
@@ -344,7 +346,7 @@ async function createFioAsset(name, parent, signedUrl) {
   );
 
   const data = await resp.json();
-
+  console.log('createFioAsset:', data)
 };
 
 async function createB2SignedUrls (prefix) {
