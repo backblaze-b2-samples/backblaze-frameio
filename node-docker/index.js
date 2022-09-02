@@ -22,7 +22,7 @@ TODO:
  - import folders 
  - return before tree walk will be faster but won't show size
  - status page? with file list, upload progress, and initiated user
- - uploadmanager percent stats somewhere? (exist currently per chunk to console)
+ - upload manager percent stats somewhere? (exist currently per chunk to console)
  - external logging (too much infra)
  - store all metadata somewhere from the fio API calls (b2 metadata?)
  - clean up exit points in processExportList
@@ -33,7 +33,7 @@ const fetch = require('node-fetch');
 const express = require('express');
 const stream = require('stream');
 const AWS = require('aws-sdk');
-var crypto = require('crypto'); // verify frame.io signature values
+const crypto = require('crypto'); // verify frame.io signature values
 
 const ENV_VARS = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
 const UPLOAD_PATH = 'fio_exports/';
@@ -44,12 +44,12 @@ const app = express();
 app.use(express.json());
 app.use(compression());
 
+const b2 = getB2Conn();
 
-app.post('/', [checkSig, formProcessor], async (req, res, next) => {
+app.post('/', [checkSig, formProcessor], async(req, res) => {
 
     // send the data on for processing.
-    filesize = 0;
-    let { name } = await processExportList(req);
+    let { name, filesize } = await processExportList(req);
 
     name = name.replaceAll('\/', '');
 
@@ -59,7 +59,7 @@ app.post('/', [checkSig, formProcessor], async (req, res, next) => {
                'title': 'Job rejected.',
                'description': `${name} not supported.`
            });
-       };
+       }
 
        res.status(202).json({
            'title': 'Job received!',
@@ -79,59 +79,62 @@ app.listen(8675, () => {
 });
 
 
-async function checkEnvVars () {
+function checkEnvVars() {
     // make sure the environment variables are set
     try {
         ENV_VARS.forEach(element => {
             console.log('checking: ', element);
-            if (!process.env[element] || process.env[element] == '') {
-                throw('Environment variable: ', element);
-            };
-        });
+            if (!process.env[element]) {
+                throw(`Environment variable not set: ${element}`);
+            }
+        })
     } catch(err) {
         console.log('ERROR checkEnvVars: ', err);
         throw({'error': 'internal configuration'});
-    };
-};
+    }
+}
 
-function checkSig (req, res, next) {
+function checkSig(req, res, next) {
     // check signature for Frame.io
     try {
         // Frame.io signature format is 'v0:timestamp:body'
         let sigString = 'v0:' + req.header('X-Frameio-Request-Timestamp') + ':' + JSON.stringify(req.body);
 
         //check to make sure the signature matches
-        if (('v0=' + calcHMAC(sigString)) != (req.header('X-Frameio-Signature'))) {
-            return res.status(403).json({'error': 'mismatched hmac'});
-        };
+        const expectedSignature = 'v0=' + calcHMAC(sigString);
+        if (expectedSignature !== req.header('X-Frameio-Signature')) {
+            console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`)
+            return res.status(403).json();
+        }
         return next();
     } catch(err) {
         console.log('ERROR checkSig: ', err.message);
         throw err;
     }
-};
+}
 
-function calcHMAC (stringToHash) {
+function calcHMAC(stringToHash) {
     //calculate SHA256 HMAC of string.
     try {
         const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
         const data = hmac.update(stringToHash);
-        const gen_hmac = data.digest('hex');
-        console.log('hmac: ', gen_hmac);
-        return(gen_hmac);
+        return data.digest('hex');
     } catch(err) {
-        console.log('ERROR calcHMAC: ', err.message);
+        console.log('ERROR calcHMAC: ', err);
         throw err;
     }
-};
+}
 
-async function formProcessor (req, res, next) {
+async function formProcessor(req, res, next) {
     // frame.io callback form logic
+    let formResponse;
+    let filesize;
+
     try {
         let data = req.body.data;
         console.log(req.body);
 
-        if ( !data ) { // send user first question
+        if (!data) { // send user first question
             formResponse = {
                 "title": "Import or Export?",
                 "description": "Import from Backblaze B2, or export to Backblaze B2?",
@@ -139,13 +142,17 @@ async function formProcessor (req, res, next) {
                     "type": "select",
                     "label": "Import or Export",
                     "name": "copytype",
-                    "options": [{   
-                        "name": "Export to Backblaze B2","value": "export" },{ 
-                        "name": "Import from Backblaze B2", "value": "import" }]}]};
-            return (res.status(202).json(formResponse));
-        };
+                    "options": [{
+                        "name": "Export to Backblaze B2", "value": "export"
+                    }, {
+                        "name": "Import from Backblaze B2", "value": "import"
+                    }]
+                }]
+            };
+            return res.status(202).json(formResponse);
+        }
 
-        if ( data.copytype  == "export") {
+        if (data['copytype'] === "export") {
             formResponse = {
                 "title": "Specific Asset(s) or Whole Project?",
                 "description": "Export the specific asset(s) selected or the entire project?",
@@ -153,49 +160,63 @@ async function formProcessor (req, res, next) {
                     "type": "select",
                     "label": "Specific Asset(s) or Entire Project",
                     "name": "depth",
-                    "options": [{   
-                        "name": "Specific Asset(s)","value": "asset" },{ 
-                        "name": "Entire Project", "value": "project" }]}]};
-            return (res.status(202).json(formResponse));
-        };
-
-        if (data.copytype  == "import") {
-                // todo : possibly limit importing the export location
-                formResponse = {
-                    "title": "Enter the location",
-                    "description": `Please enter the object path to import from Backblaze. As a reminder, your bucket name is ${process.env.BUCKET_NAME}. Only single files are currently supported.`,
-                    "fields": [{
-                        "type": "text",
-                        "label": "B2 Path",
-                        "name": "b2path"}]};
-            return (res.status(202).json(formResponse));
-        };
-
-        if ( data.depth ) { // user chose export
-            return next();
-        };
-
-        if ( data.b2path ) { // user chose import
-            filesize = await processImport(req);
+                    "options": [{
+                        "name": "Specific Asset(s)", "value": "asset"
+                    }, {
+                        "name": "Entire Project", "value": "project"
+                    }]
+                }]
+            };
+            return res.status(202).json(formResponse);
+        } else  if (data['copytype'] === "import") {
+            // todo : possibly limit importing the export location
             formResponse = {
+                "title": "Enter the location",
+                "description": `Please enter the object path to import from Backblaze. As a reminder, your bucket name is ${process.env.BUCKET_NAME}. Only single files are currently supported.`,
+                "fields": [{
+                    "type": "text",
+                    "label": "B2 Path",
+                    "name": "b2path"
+                }]
+            };
+            return res.status(202).json(formResponse);
+        }
+
+        if (data.depth) { // user chose export
+            return next();
+        }
+
+        if (data['b2path']) { // user chose import
+            try {
+                filesize = await processImport(req);
+                formResponse = {
                     "title": "Submitted",
-                    "description": `Submitted ${formatBytes(filesize)}`};
-        };
+                    "description": `Submitted ${formatBytes(filesize)} for import`
+                };
+            } catch (err) {
+                formResponse = {
+                    "title": "Error",
+                    "description": err['code'] === 'NotFound'
+                        ? `${req.body.data['b2path']} not found`
+                        : err['code']
+                };
+            }
+        }
 
         // finish formProcessor
-        if ( formResponse ) {
-            return (res.status(202).json(formResponse));
+        if (formResponse) {
+            return res.status(202).json(formResponse);
         } else {
-            return (res.status(500).json({"title": "Error","description": 'Unknown stage.'}));
-        };
+            return res.status(500).json({"title": "Error", "description": 'Unknown stage.'});
+        }
 
-    } catch(err) {
-        console.log('ERROR formProcessor: ', err.message);
-        throw new Error(err);
-    };
-};
+    } catch (err) {
+        console.log('ERROR formProcessor: ', err, err.stack);
+        throw new Error('ERROR formProcessor', err);
+    }
+}
 
-async function processExportList (idReq, fileTree='') {
+async function processExportList(idReq, fileTree= '') {
     // get asset info based on the id from Frame.io
     // params: a request object with the id of the item
     //         and a fileTree to track location in 
@@ -205,44 +226,44 @@ async function processExportList (idReq, fileTree='') {
     let data = idReq.body.data;
 
     try {
-        let r = await getFioAssetInfo (resource.id);
-        console.log('quantity ', r.length);
+        const r = await getFioAssetInfo(resource.id);
+        let filesize = 0;
+
+        console.log(`processExportList for ${resource.id}, ${fileTree}, ${r.length}`);
 
         // if 'project' selected, run this once to initiate a top level project recursion
-        if (data.depth == 'project' && ! data.initiated) {
-            resource.id = r.project.root_asset_id + '/children';
+        if (data.depth === 'project' && ! data.initiated) {
+            resource.id = r.project['root_asset_id'] + '/children';
             fileTree = r.project.name;
-            data.initiated = 1;
-            await processExportList(idReq, fileTree + '/');
-            return { name: r.project.name };
-        };
+            data.initiated = true;
+            let l = await processExportList(idReq, fileTree + '/');
+            return { name: r.project.name, filesize: l.filesize };
+        }
 
         if (r.length) { // more than one item in the response
             for (const i of Object.keys(r)) {
-                if (r[i].type == 'version_stack' || r[i].type == 'folder') {
+                if (r[i].type === 'version_stack' || r[i].type === 'folder') {
                     // handle nested folders and version stacks etc
-                    console.log(r[i].id + '/children');
                     resource.id = r[i].id + '/children';
-                    await processExportList(idReq, fileTree + r[i].name + '/');
-                } else if (r[i].type == 'file') {
+                    let l = await processExportList(idReq, fileTree + r[i].name + '/');
+                    filesize += l.filesize;
+                } else if (r[i].type === 'file') {
+                    streamToB2(r[i]['original'], fileTree + r[i].name, r[i].filesize);
                     filesize += r[i].filesize;
-                    streamToB2(r[i].original, fileTree + r[i].name, r[i].filesize);
                 } else {
                     console.log(r.type, 'unknown type'); // recursive 'if' above should prevent getting here
                     return { name: 'error: unknown type' + fileTree + '/' + r.name }
-                };
-            };
-            console.log('multistack done');
-            return { name: fileTree };
+                }
+            }
+            console.log('list done');
+            return { name: fileTree, filesize: filesize };
         } else { // a single item in the response
-            if (r.type == 'file') {
-                console.log('file type: ', r.name);
-                filesize += r.filesize;
-                streamToB2(r.original, fileTree + r.name, r.filesize);
-                return { name: r.name };
-            } else if (r.type == 'version_stack') {
+            if (r.type === 'file') {
+                streamToB2(r['original'], fileTree + r.name, r.filesize);
+                return { name: r.name, filesize: r.filesize };
+            } else if (r.type === 'version_stack') {
                 resource.id = r.id + '/children';
-                return { name } = await processExportList(idReq, fileTree + r.name + '/');
+                return processExportList(idReq, fileTree + r.name + '/');
             } else {
                 console.log('file type: ', r.name, r.type);
                 console.log('type not supported, or not found');
@@ -253,11 +274,10 @@ async function processExportList (idReq, fileTree='') {
     } catch(err) {
         console.log('error received: ', err);
         return { name: err };
-        //return (`error: ${err}`);
     }
-};
+}
 
-async function getFioAssetInfo (id) {
+async function getFioAssetInfo(id) {
     let path = `https://api.frame.io/v2/assets/${id}`;
     let requestOptions = {
       method: 'GET',
@@ -267,40 +287,39 @@ async function getFioAssetInfo (id) {
       }
     };
 
-    let request = await fetch(path, requestOptions);
-    return await request.json();
-};
+    const response = await fetch(path, requestOptions);
 
-async function processImport (req) {
+    return response.json();
+}
+
+async function processImport(req) {
     // make sure not importing from UPLOAD_PATH ?
-    let signedUrl = await createB2SignedUrls(req.body.data.b2path);
-    let objectSize = await getB2ObjectSize(req.body.data.b2path);
-    console.log('objectSize : ', objectSize);
+    const b2path =  req.body.data['b2path'];
+    let objectSize = await getB2ObjectSize(b2path);
+    let signedUrl = await createB2SignedUrls(b2path);
     let parent = await createFioFolder(req);
-    createFioAsset(req.body.data.b2path, parent, signedUrl, objectSize);
-    console.log('import submitted', req.body.data.b2path);
-    return(objectSize);
-};
+    createFioAsset(b2path, parent, signedUrl, objectSize);
+    console.log('import submitted', b2path);
+    return objectSize;
+}
 
-const getB2Conn = () => {
+function getB2Conn() {
     const endpoint = new AWS.Endpoint('https://' + process.env.BUCKET_ENDPOINT);
     //AWS.config.logger = console;
-    const b2 = new AWS.S3({
+    return new AWS.S3({
         endpoint: endpoint, 
         region: process.env.BUCKET_ENDPOINT.replaceAll(/s3\.(.*?)\.backblazeb2\.com/g, '$1'),
         signatureVersion: 'v4',
         customUserAgent: 'b2-node-docker-0.2',
         secretAccessKey: process.env.SECRET_KEY, 
         accessKeyId: process.env.ACCESS_KEY  
-        });
-    return b2;
-};
+    });
+}
 
-const createB2WriteStream = (name, filesize) => {
+function createB2WriteStream(name, filesize) {
     const pass = new stream.PassThrough();
 
-    const b2 = getB2Conn();
-    // the defaults are queueSize 4 and partsize 5mb (vs 100mb)
+    // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
     // these can be adjusted up for larger machines or
     // down for small ones (or instances with lots of concurrent users)
     const opts = {queueSize: 16, partSize: 1024 * 1024 * 100};
@@ -322,11 +341,11 @@ const createB2WriteStream = (name, filesize) => {
         };
     } catch(err) {
         console.log('createB2WriteStream failed : ', err)
-        throw ('createB2WriteStream failed : ', err);
+        throw new Error('createB2WriteStream failed', err);
     }
-};
+}
 
-async function getFioRoot (req) {
+async function getFioRoot(req) {
 
     let path = `https://api.frame.io/v2/assets/${req.body.resource.id}`;
     let requestOptions = {
@@ -339,30 +358,32 @@ async function getFioRoot (req) {
     try {
         let request = await fetch(path, requestOptions);
         let r = await request.json();
-        console.log('root:', r.project.root_asset_id);
-        return(r.project.root_asset_id);
+        console.log('root:', r.project['root_asset_id']);
+        return r.project['root_asset_id'];
     } catch(err) {
         console.log('error received: ', err);
         return { name: err };
-    };
-};
+    }
+}
 
 async function createFioFolder(req, name="b2_imports") {
     // create folder in frameio
     let root = await getFioRoot(req);
 
     // check if folder already exists
-    r = await getFioAssetInfo(root + '/children');
+    let r = await getFioAssetInfo(root + '/children');
     for (const i of Object.keys(r)) {
-        if (r[i].name == name) return(r[i].id);
+        if (r[i].name === name) {
+            return (r[i].id);
+        }
     }
 
     let path = `https://api.frame.io/v2/assets/${root}/children`;
-    var body = JSON.stringify({
+    const body = JSON.stringify({
         'filesize': 0,
         'name': name,
         'type': 'folder'
-      });
+    });
 
     let requestOptions = {
       method: 'POST',
@@ -375,19 +396,19 @@ async function createFioFolder(req, name="b2_imports") {
 
     const resp = await fetch(path, requestOptions);
     const data = await resp.json();
-    return(data.id);
-};
+    return data.id;
+}
 
 async function createFioAsset(name, parent, signedUrl, filesize) {
     // create new single asset
 
     let path = `https://api.frame.io/v2/assets/${parent}/children`;
-    var body = JSON.stringify({
+    const body = JSON.stringify({
         'filesize': filesize,
         'name': name.replace(UPLOAD_PATH,''),     //remove exports folder name when re-importing
         'type': 'file',
-        'source': {'url': `${signedUrl}`}
-      });
+        'source': {'url': signedUrl}
+    });
 
     let requestOptions = {
       method: 'POST',
@@ -399,38 +420,41 @@ async function createFioAsset(name, parent, signedUrl, filesize) {
     };
 
     const resp = await fetch(path, requestOptions);
-    const data = await resp.json();
-};
+    return resp.json();
+}
 
-async function createB2SignedUrls (key) {
-    const b2 = getB2Conn();
+async function createB2SignedUrls(key) {
     const signedUrlExpiration = 60 * 15; // 60 seconds * minutes
-
-    const url = await b2.getSignedUrl('getObject', {
+    return b2.getSignedUrl('getObject', {
                 Bucket: process.env.BUCKET_NAME,
                 Key: key,
                 Expires: signedUrlExpiration
                 });
-    return(url);
-};
+}
 
-async function getB2ObjectSize (key) {
-    const b2 = getB2Conn();
-    const headResp = await b2.headObject({
-                Bucket: process.env.BUCKET_NAME,
-                Key: key
-                }).promise();
+async function getB2ObjectSize(key) {
+    console.log("!!!", key);
+    return new Promise((resolve, reject) =>
+        b2.headObject({
+            Bucket: process.env.BUCKET_NAME,
+            Key: key
+        }, (err, response) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(response['ContentLength']);
+            }
+        })
+    );
+}
 
-    return(headResp.ContentLength);
-};
-
-async function streamToB2 (url, name, filesize) { 
-
+async function streamToB2(url, name, filesize) {
+    console.log(`streamToB2: ${url}, ${name}, ${filesize}`);
     try {
         const { writeStream, promise } = createB2WriteStream(name, filesize);
-        
+
         fetch(url)
-            .then(response => {
+            .then((response) => {
                 response.body.pipe(writeStream);
         });
 
@@ -438,23 +462,23 @@ async function streamToB2 (url, name, filesize) {
             await promise;
             console.log('upload complete: ', name)
         } catch (error) {
-            console.log('streamToB2 error: ', error.message);
+            console.log('streamToB2 error: ', error);
         }
 
     } catch(err) {
-        throw ('streamToB2: ', err);
+        throw new Error('streamToB2: ', err);
     }
-    return (name);
-};
+    return name;
+}
 
-function formatBytes (bytes, decimals=1) {
+function formatBytes(bytes, decimals= 1) {
     if (bytes === 0) return '0 Bytes';
 
-    const k = 1024;
+    const k = 1000;
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-};
+}

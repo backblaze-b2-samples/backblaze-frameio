@@ -3,3 +3,6 @@
 node_modules
 .DS_Store
 .env
+.idea
+risingcloud.yaml
+risingcloud_project.zip
