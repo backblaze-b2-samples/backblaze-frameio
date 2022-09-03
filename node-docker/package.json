@@ -8,15 +8,16 @@
   },
   "author": "",
   "license": "",
-  "engines" : {
-    "npm" : ">=8.18.0",
-    "node" : ">=18.8.0"
+  "engines": {
+    "npm": ">=8.18.0",
+    "node": ">=18.8.0"
   },
   "dependencies": {
     "aws-sdk": "^2.1163.0",
+    "compression": "",
     "express": "^4.18.1",
+    "http-errors": "^2.0.0",
     "node-fetch": "^2.6.0",
-    "stream": "^0.0.2",
-    "compression": ""
+    "stream": "^0.0.2"
   }
 }
