@@ -1,5 +1,3 @@
-//const AWS = require("aws-sdk");
-
 import pkg from 'aws-sdk';
 const {Endpoint, S3} = pkg;
 
@@ -26,7 +24,6 @@ export async function createB2SignedUrls(b2, key) {
 }
 
 export async function getB2ObjectSize(b2, key) {
-    console.log("!!!", key);
     return new Promise((resolve, reject) =>
         b2.headObject({
             Bucket: process.env.BUCKET_NAME,
