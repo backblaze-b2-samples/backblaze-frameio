@@ -88,7 +88,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
                 b2path: b2path,
                 id: req.body.resource.id,
                 filesize: filesize
-            })
+            });
 
             response = {
                 "title": "Submitted",
