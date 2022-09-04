@@ -25,53 +25,90 @@ TODO:
  - upload manager percent stats somewhere? (exist currently per chunk to console)
  - external logging (too much infra)
  - store all metadata somewhere from the fio API calls (b2 metadata?)
- - clean up exit points in processExportList
+ - clean up exit points in createExportList
 
 */
-const compression = require('compression')
-const fetch = require('node-fetch');
-const express = require('express');
-const stream = require('stream');
-const AWS = require('aws-sdk');
-const crypto = require('crypto');
-const createError = require('http-errors');
+import {getFioAssets} from "./frameio.js";
+import { formatBytes } from "./formatbytes.js";
+import {getB2Conn, getB2ObjectSize} from "./b2.js";
 
-const ENV_VARS = ['FRAMEIO_TOKEN', 'FRAMEIO_SECRET', 'BUCKET_ENDPOINT', 'BUCKET_NAME', 'ACCESS_KEY', 'SECRET_KEY'];
-const UPLOAD_PATH = 'fio_exports/';
-const DOWNLOAD_PATH = 'b2_imports';
-const TOKEN = process.env.FRAMEIO_TOKEN;
+import compression from "compression";
+import express from "express";
+import {fork} from "child_process";
 
+const ENV_VARS = [
+    'FRAMEIO_TOKEN',
+    'FRAMEIO_SECRET',
+    'BUCKET_ENDPOINT',
+    'BUCKET_NAME',
+    'ACCESS_KEY',
+    'SECRET_KEY',
+    'UPLOAD_PATH',
+    'DOWNLOAD_PATH'
+];
+
+const b2 = getB2Conn();
 
 const app = express();
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
-const b2 = getB2Conn();
-
 app.post('/', [checkContentType, formProcessor], async(req, res) => {
+    let data = req.body.data;
+    let response;
 
-    // send the data on for processing.
-    let { name, filesize } = await processExportList(req);
+    if (data['depth']) { // user chose export
+        try {
+            const exportList = [];
+            let { name, filesize } = await createExportList(req, exportList);
 
-    name = name.replaceAll('\/', '');
+            // fork a process for the export, so we don't hang the web server
+            const exporter = fork('exporter.js');
+            exporter.send(exportList);
 
-    try {
-       if ( name.startsWith('error')) {
-           res.json({
-               'title': 'Job rejected.',
-               'description': `${name} not supported.`
-           });
-       }
+            response = {
+                'title': 'Job received!',
+                'description': `Job for '${name.replaceAll('\/', '')}' has been triggered. Total size ${formatBytes(filesize)}`
+            };
+        } catch(err) {
+            console.log('Caught export error in app.post: ', err);
+            response = {
+                'title': 'Error',
+                'description': `${err}`
+            };
+        }
+    } else if (data['b2path']) { // user chose import
+        try {
+            const b2path = req.body.data['b2path'];
+            const filesize = await getB2ObjectSize(b2, b2path);
 
-       res.sendStatus(202).json({
-           'title': 'Job received!',
-           'description': `Job for '${name}' has been triggered. Total size ${formatBytes(filesize)}`
-       });
-    } catch(err) {
-        console.log('ERROR / POST: ', err.message);
-        res.sendStatus(500).json({'error': 'error processing input'});
-        throw err;
+            const importer = fork('importer.js');
+            importer.send({
+                b2path: b2path,
+                id: req.body.resource.id,
+                filesize: filesize
+            })
+
+            response = {
+                "title": "Submitted",
+                "description": `Submitted ${formatBytes(filesize)} for import`
+            };
+        } catch (err) {
+            console.log('Caught import error in app.post: ', err);
+            response = {
+                "title": "Error",
+                "description": err['code'] === 'NotFound'
+                    ? `${req.body.data['b2path']} not found`
+                    : err['code']
+            };
+        }
+    }
+
+    if (response) {
+        res.status(202).json(response);
+    } else {
+        res.status(500).json({"title": "Error", "description": 'Unknown stage.'});
     }
 });
 
@@ -107,39 +144,38 @@ function checkEnvVars() {
 }
 
 function verifyTimestampAndSignature(req, res, buf, encoding) {
-    // X-Frameio-Request-Timestamp header from incoming request
-    const timestamp = req.header('X-Frameio-Request-Timestamp');
-    // Epoch time in seconds
-    const now = Date.now() / 1000;
-    const FIVE_MINUTES = 5 * 60;
-
-    if (!timestamp) {
-        console.log('Missing timestamp')
-        throw createError(403);
-    }
-
-    // Frame.io suggests verifying that the timestamp is within five minutes of local time
-    if (timestamp < (now - FIVE_MINUTES) || timestamp > (now + FIVE_MINUTES)) {
-        console.log(`Timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
-        throw createError(403);
-    }
-
-    // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
-    const body = buf.toString(encoding);
-    const stringToSign = 'v0:' + timestamp + ':' + body;
-    const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
-    const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
-
-    if (expectedSignature !== req.header('X-Frameio-Signature')) {
-        console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
-        throw createError(403);
-    }
+    // // X-Frameio-Request-Timestamp header from incoming request
+    // const timestamp = req.header('X-Frameio-Request-Timestamp');
+    // // Epoch time in seconds
+    // const now = Date.now() / 1000;
+    // const FIVE_MINUTES = 5 * 60;
+    //
+    // if (!timestamp) {
+    //     console.log('Missing timestamp')
+    //     throw createError(403);
+    // }
+    //
+    // // Frame.io suggests verifying that the timestamp is within five minutes of local time
+    // if (timestamp < (now - FIVE_MINUTES) || timestamp > (now + FIVE_MINUTES)) {
+    //     console.log(`Timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
+    //     throw createError(403);
+    // }
+    //
+    // // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
+    // const body = buf.toString(encoding);
+    // const stringToSign = 'v0:' + timestamp + ':' + body;
+    // const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
+    // const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
+    //
+    // if (expectedSignature !== req.header('X-Frameio-Signature')) {
+    //     console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
+    //     throw createError(403);
+    // }
 }
 
 async function formProcessor(req, res, next) {
     // frame.io callback form logic
     let formResponse;
-    let filesize;
 
     try {
         let data = req.body.data;
@@ -193,300 +229,70 @@ async function formProcessor(req, res, next) {
             return res.json(formResponse);
         }
 
-        if (data['depth']) { // user chose export
-            return next();
-        } else if (data['b2path']) { // user chose import
-            try {
-                filesize = await processImport(req);
-                formResponse = {
-                    "title": "Submitted",
-                    "description": `Submitted ${formatBytes(filesize)} for import`
-                };
-            } catch (err) {
-                formResponse = {
-                    "title": "Error",
-                    "description": err['code'] === 'NotFound'
-                        ? `${req.body.data['b2path']} not found`
-                        : err['code']
-                };
-            }
-        }
-
-        // finish formProcessor
-        if (formResponse) {
-            return res.sendStatus(202).json(formResponse);
-        } else {
-            return res.sendStatus(500).json({"title": "Error", "description": 'Unknown stage.'});
-        }
-
+        next();
     } catch (err) {
         console.log('ERROR formProcessor: ', err, err.stack);
         throw new Error('ERROR formProcessor', err);
     }
 }
 
-async function processExportList(idReq, fileTree= '') {
-    // get asset info based on the id from Frame.io
-    // params: a request object with the id of the item
-    //         and a fileTree to track location in 
-    //         nested paths during recursion
+async function createExportList(req, exportList, fileTree= '') {
+    let resource = req.body.resource;
+    let data = req.body.data;
 
-    let resource = idReq.body.resource;
-    let data = idReq.body.data;
+    const fioResponse = await getFioAssets(resource.id);
+    let response;
 
-    try {
-        const response = await getFioAssets(resource.id);
-        let filesize = 0;
+    console.log(`processExportList for ${resource.id}, ${fileTree}, ${fioResponse.length}`);
 
-        console.log(`processExportList for ${resource.id}, ${fileTree}, ${response.length}`);
-
-        // if 'project' selected, run this once to initiate a top level project recursion
-        if (data.depth === 'project' && ! data.initiated) {
-            resource.id = response.project['root_asset_id'] + '/children';
-            fileTree = response.project.name;
-            data.initiated = true;
-            let l = await processExportList(idReq, fileTree + '/');
-            return { name: response.project.name, filesize: l.filesize };
-        }
-
-        if (response.length) { // more than one item in the response
-            const assetList = response;
-            for (const asset of assetList) {
-                if (asset.type === 'version_stack' || asset.type === 'folder') {
-                    // handle nested folders and version stacks etc
-                    resource.id = asset.id + '/children';
-                    let l = await processExportList(idReq, fileTree + asset.name + '/');
-                    filesize += l.filesize;
-                } else if (asset.type === 'file') {
-                    streamToB2(asset['original'], fileTree + asset.name, asset.filesize);
-                    filesize += asset.filesize;
-                } else {
-                    console.log(assetList.type, 'unknown type'); // recursive 'if' above should prevent getting here
-                    return { name: 'error: unknown type' + fileTree + '/' + assetList.name }
-                }
-            }
-            console.log('list done');
-            return { name: fileTree, filesize: filesize };
-        } else { // a single item in the response
-            const asset = response;
-            if (asset.type === 'file') {
-                streamToB2(asset['original'], fileTree + asset.name, asset.filesize);
-                return { name: asset.name, filesize: asset.filesize };
-            } else if (asset.type === 'version_stack') {
+    // if 'project' selected, run this once to initiate a top level project recursion
+    if (data.depth === 'project' && ! data.initiated) {
+        const asset = fioResponse;
+        resource.id = asset.project['root_asset_id'] + '/children';
+        fileTree = asset.project.name;
+        data.initiated = true;
+        let l = await createExportList(req, exportList, fileTree + '/');
+        response = { name: asset.project.name, filesize: l.filesize };
+    } else if (fioResponse.length) { // more than one item in the response
+        response = { name: fileTree, filesize: 0 };
+        const assetList = fioResponse;
+        for (const asset of assetList) {
+            if (asset.type === 'version_stack' || asset.type === 'folder') {
+                // handle nested folders and version stacks etc
                 resource.id = asset.id + '/children';
-                return processExportList(idReq, fileTree + asset.name + '/');
-            } else {
-                console.log('file type: ', asset.name, asset.type);
-                console.log('type not supported, or not found');
-                return { name: 'error: unknown type' + fileTree + '/' + asset.name }
-            }
-        }
-    } catch(err) {
-        console.log('error received: ', err);
-        return { name: err };
-    }
-}
-
-async function getFioAssets(id) {
-    let path = `https://api.frame.io/v2/assets/${id}`;
-    let requestOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`
-      }
-    };
-
-    const response = await fetch(path, requestOptions);
-
-    return response.json();
-}
-
-async function processImport(req) {
-    // make sure not importing from UPLOAD_PATH ?
-    const b2path =  req.body.data['b2path'];
-    let objectSize = await getB2ObjectSize(b2path);
-    let signedUrl = await createB2SignedUrls(b2path);
-    let parent = await createFioFolder(req, DOWNLOAD_PATH);
-    createFioAsset(b2path, parent, signedUrl, objectSize);
-    console.log('import submitted', b2path);
-    return objectSize;
-}
-
-function getB2Conn() {
-    const endpoint = new AWS.Endpoint('https://' + process.env.BUCKET_ENDPOINT);
-    //AWS.config.logger = console;
-    return new AWS.S3({
-        endpoint: endpoint, 
-        region: process.env.BUCKET_ENDPOINT.replaceAll(/s3\.(.*?)\.backblazeb2\.com/g, '$1'),
-        signatureVersion: 'v4',
-        customUserAgent: 'b2-node-docker-0.2',
-        secretAccessKey: process.env.SECRET_KEY, 
-        accessKeyId: process.env.ACCESS_KEY  
-    });
-}
-
-function createB2WriteStream(name, filesize) {
-    const pass = new stream.PassThrough();
-
-    // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
-    // these can be adjusted up for larger machines or
-    // down for small ones (or instances with lots of concurrent users)
-    const opts = {queueSize: 16, partSize: 1024 * 1024 * 100};
-    try {
-        return { 
-            writeStream: pass, 
-            promise: b2.upload({
-                Bucket: process.env.BUCKET_NAME, 
-                Key: UPLOAD_PATH + name, 
-                Body: pass,
-                ChecksumAlgorithm: 'SHA1',
-                Metadata: {
-                    frameio_name: name,
-                    b2_keyid: process.env.ACCESS_KEY 
-                }
-            }, opts).on('httpUploadProgress', function(evt) {
-                console.log(name, formatBytes(evt.loaded), '/', formatBytes(filesize)); 
-            }).promise()
-        };
-    } catch(err) {
-        console.log('createB2WriteStream failed : ', err)
-        throw new Error('createB2WriteStream failed', err);
-    }
-}
-
-async function getFioRoot(req) {
-    let path = `https://api.frame.io/v2/assets/${req.body.resource.id}`;
-    let requestOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`
-      }
-    };
-    try {
-        let request = await fetch(path, requestOptions);
-        let r = await request.json();
-        console.log('root:', r.project['root_asset_id']);
-        return r.project['root_asset_id'];
-    } catch(err) {
-        console.log('error received: ', err);
-        return { name: err };
-    }
-}
-
-async function createFioFolder(req, name) {
-    // create folder in frameio
-    let root = await getFioRoot(req);
-
-    // check if folder already exists
-    let children = await getFioAssets(root + '/children');
-    for (const child of children) {
-        if (child['name'] === name) {
-            return child['id'];
-        }
-    }
-
-    let path = `https://api.frame.io/v2/assets/${root}/children`;
-    const body = JSON.stringify({
-        'filesize': 0,
-        'name': name,
-        'type': 'folder'
-    });
-
-    let requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`
-      },
-      body: body
-    };
-
-    const resp = await fetch(path, requestOptions);
-    const data = await resp.json();
-    return data.id;
-}
-
-async function createFioAsset(name, parent, signedUrl, filesize) {
-    // create new single asset
-    let path = `https://api.frame.io/v2/assets/${parent}/children`;
-    const body = JSON.stringify({
-        'filesize': filesize,
-        'name': name.replace(UPLOAD_PATH,''),     //remove exports folder name when re-importing
-        'type': 'file',
-        'source': {'url': signedUrl}
-    });
-
-    let requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`
-      },
-      body: body
-    };
-
-    const resp = await fetch(path, requestOptions);
-    return resp.json();
-}
-
-async function createB2SignedUrls(key) {
-    const signedUrlExpiration = 60 * 15; // 60 seconds * minutes
-    return b2.getSignedUrl('getObject', {
-                Bucket: process.env.BUCKET_NAME,
-                Key: key,
-                Expires: signedUrlExpiration
+                let l = await createExportList(req, exportList, fileTree + asset.name + '/');
+                response.filesize += l.filesize;
+            } else if (asset.type === 'file') {
+                exportList.push({
+                    url: asset['original'],
+                    name: fileTree + asset.name,
+                    filesize: asset.filesize
                 });
-}
-
-async function getB2ObjectSize(key) {
-    console.log("!!!", key);
-    return new Promise((resolve, reject) =>
-        b2.headObject({
-            Bucket: process.env.BUCKET_NAME,
-            Key: key
-        }, (err, response) => {
-            if (err) {
-                reject(err);
+                response.filesize += asset.filesize;
             } else {
-                resolve(response['ContentLength']);
+                console.log(assetList.type, 'unknown type'); // recursive 'if' above should prevent getting here
+                throw('error: unknown type' + fileTree + '/' + assetList.name);
             }
-        })
-    );
-}
-
-async function streamToB2(url, name, filesize) {
-    console.log(`streamToB2: ${url}, ${name}, ${filesize}`);
-    try {
-        const { writeStream, promise } = createB2WriteStream(name, filesize);
-
-        fetch(url)
-            .then((response) => {
-                response.body.pipe(writeStream);
-        });
-
-        try {            
-            await promise;
-            console.log('upload complete: ', name)
-        } catch (error) {
-            console.log('streamToB2 error: ', error);
         }
-
-    } catch(err) {
-        throw new Error('streamToB2: ', err);
+        console.log('list done');
+    } else { // a single item in the response
+        const asset = fioResponse;
+        if (asset.type === 'file') {
+            exportList.push({
+                url: asset['original'],
+                name: fileTree + asset.name,
+                filesize: asset.filesize
+            });
+            response = { name: asset.name, filesize: asset.filesize };
+        } else if (asset.type === 'version_stack') {
+            resource.id = asset.id + '/children';
+            response = createExportList(req,  fileTree + asset.name + '/');
+        } else {
+            console.log('file type: ', asset.name, asset.type);
+            console.log('type not supported, or not found');
+            throw('error: unknown type' + fileTree + '/' + asset.name);
+        }
     }
-    return name;
-}
 
-function formatBytes(bytes, decimals= 1) {
-    if (bytes === 0) return '0 Bytes';
-
-    const k = 1000;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    return response;
 }
