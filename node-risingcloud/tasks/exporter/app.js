@@ -1,9 +1,10 @@
-import {formatBytes} from "./formatbytes.js";
-import {getB2Conn} from "./b2.js";
+const fs = require('fs');
+const stream = require("stream");
+const fetch = require("node-fetch");
 
-import fetch from "node-fetch";
+const {formatBytes} = require("backblaze-frameio-common/formatbytes");
+const {getB2Conn} = require("backblaze-frameio-common/b2");
 
-import stream from "stream";
 
 async function streamToB2(b2, url, name, filesize) {
     console.log(`streamToB2: ${url}, ${name}, ${filesize}`);
@@ -34,7 +35,7 @@ function createB2WriteStream(b2, name, filesize) {
     // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
     // these can be adjusted up for larger machines or
     // down for small ones (or instances with lots of concurrent users)
-    const opts = {queueSize: 16, partSize: 1024 * 1024 * 100};
+    const opts = {queueSize: process.env.QUEUE_SIZE, partSize: process.env.PART_SIZE};
     try {
         return {
             writeStream: pass,
@@ -58,8 +59,12 @@ function createB2WriteStream(b2, name, filesize) {
 }
 
 
-process.on('message', async (exportList) => {
-    console.log(`exporter received ${exportList.length} entries`);
+(async() => {
+    let rawdata = fs.readFileSync('./request.json');
+    console.log(`Request: ${rawdata}`);
+    let request = JSON.parse(rawdata);
+
+    const exportList = request['exportList'];
     const promises = []
     const b2 = getB2Conn();
 
@@ -67,7 +72,15 @@ process.on('message', async (exportList) => {
         promises.push(streamToB2(b2, entry.url, entry.name, entry.filesize));
     }
 
-    await Promise.allSettled(promises);
-    process.exit(0);
-});
+    const results = await Promise.allSettled(promises);
 
+    const output = []
+    for (let i = 0; i < exportList.length; i++) {
+        output.push({...exportList[i], ...results[i]})
+    }
+
+    let response = {"exportList": output};
+    const data = JSON.stringify(response, null, 2);
+    console.log(`Response: ${data}`);
+    fs.writeFileSync('./response.json', data);
+})();

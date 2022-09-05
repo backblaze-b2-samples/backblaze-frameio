@@ -28,13 +28,13 @@ TODO:
  - clean up exit points in createExportList
 
 */
-import {getFioAssets} from "./frameio.js";
-import { formatBytes } from "./formatbytes.js";
-import {getB2Conn, getB2ObjectSize} from "./b2.js";
-
-import compression from "compression";
-import express from "express";
-import {fork} from "child_process";
+const createError = require("http-errors");
+const fetch = require("node-fetch");
+const compression = require("compression");
+const express = require("express");
+const {getB2Conn, getB2ObjectSize} = require("backblaze-frameio-common/b2");
+const {formatBytes} = require("backblaze-frameio-common/formatbytes");
+const {getFioAssets} = require("backblaze-frameio-common/frameio");
 
 const ENV_VARS = [
     'FRAMEIO_TOKEN',
@@ -43,8 +43,10 @@ const ENV_VARS = [
     'BUCKET_NAME',
     'ACCESS_KEY',
     'SECRET_KEY',
-    'UPLOAD_PATH',
-    'DOWNLOAD_PATH'
+    'IMPORTER',
+    'IMPORTER_KEY',
+    'EXPORTER',
+    'EXPORTER_KEY'
 ];
 
 const b2 = getB2Conn();
@@ -63,9 +65,18 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
             const exportList = [];
             let { name, filesize } = await createExportList(req, exportList);
 
-            // fork a process for the export, so we don't hang the web server
-            const exporter = fork('exporter.js');
-            exporter.send(exportList);
+            // Use a Rising Cloud task for the export, so we don't hang the web server
+            const path = new URL("/risingcloud/jobs", process.env.EXPORTER);
+            const request = { exportList: exportList };
+            console.log('Export request: ', JSON.stringify(request, null, 2));
+            const job = await fetch(path,{
+                method: 'POST',
+                body: JSON.stringify(request),
+                headers: {
+                    "X-RisingCloud-Auth": process.env.EXPORTER_KEY
+                }
+            }).then((response) => response.json());
+            console.log('Export job: ', JSON.stringify(job, null, 2));
 
             response = {
                 'title': 'Job received!',
@@ -83,12 +94,22 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
             const b2path = req.body.data['b2path'];
             const filesize = await getB2ObjectSize(b2, b2path);
 
-            const importer = fork('importer.js');
-            importer.send({
+            // Use a Rising Cloud task for the export, so we don't hang the web server
+            const path = new URL("/risingcloud/jobs", process.env.IMPORTER);
+            const request = {
                 b2path: b2path,
                 id: req.body.resource.id,
                 filesize: filesize
-            });
+            };
+            console.log('Import request: ', JSON.stringify(request, null, 2));
+            const job = await fetch(path,{
+                method: 'POST',
+                body: JSON.stringify(request),
+                headers: {
+                    "X-RisingCloud-Auth": process.env.IMPORTER_KEY
+                }
+            }).then((response) => response.json());
+            console.log('Import job: ', JSON.stringify(job, null, 2));
 
             response = {
                 "title": "Submitted",
@@ -112,9 +133,8 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     }
 });
 
-app.listen(8675, () => {
+app.listen(8888, () => {
     checkEnvVars();
-    console.log(`NODE_ENV: ${process.env['NODE_ENV']}`)
     console.log('Server ready and listening');
 });
 
@@ -144,33 +164,33 @@ function checkEnvVars() {
 }
 
 function verifyTimestampAndSignature(req, res, buf, encoding) {
-    // // X-Frameio-Request-Timestamp header from incoming request
-    // const timestamp = req.header('X-Frameio-Request-Timestamp');
-    // // Epoch time in seconds
-    // const now = Date.now() / 1000;
-    // const FIVE_MINUTES = 5 * 60;
-    //
-    // if (!timestamp) {
-    //     console.log('Missing timestamp')
-    //     throw createError(403);
-    // }
-    //
-    // // Frame.io suggests verifying that the timestamp is within five minutes of local time
-    // if (timestamp < (now - FIVE_MINUTES) || timestamp > (now + FIVE_MINUTES)) {
-    //     console.log(`Timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
-    //     throw createError(403);
-    // }
-    //
-    // // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
-    // const body = buf.toString(encoding);
-    // const stringToSign = 'v0:' + timestamp + ':' + body;
-    // const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
-    // const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
-    //
-    // if (expectedSignature !== req.header('X-Frameio-Signature')) {
-    //     console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
-    //     throw createError(403);
-    // }
+    // X-Frameio-Request-Timestamp header from incoming request
+    const timestamp = req.header('X-Frameio-Request-Timestamp');
+    // Epoch time in seconds
+    const now = Date.now() / 1000;
+    const FIVE_MINUTES = 5 * 60;
+
+    if (!timestamp) {
+        console.log('Missing timestamp')
+        throw createError(403);
+    }
+
+    // Frame.io suggests verifying that the timestamp is within five minutes of local time
+    if (timestamp < (now - FIVE_MINUTES) || timestamp > (now + FIVE_MINUTES)) {
+        console.log(`Timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
+        throw createError(403);
+    }
+
+    // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
+    const body = buf.toString(encoding);
+    const stringToSign = 'v0:' + timestamp + ':' + body;
+    const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
+    const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
+
+    if (expectedSignature !== req.header('X-Frameio-Signature')) {
+        console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
+        throw createError(403);
+    }
 }
 
 async function formProcessor(req, res, next) {

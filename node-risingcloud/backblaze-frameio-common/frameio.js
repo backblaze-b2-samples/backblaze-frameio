@@ -1,8 +1,8 @@
-import fetch from "node-fetch";
+const fetch = require("node-fetch");
 
 const TOKEN = process.env.FRAMEIO_TOKEN;
 
-export async function getFioAssets(id) {
+async function getFioAssets(id) {
     let page = 1;
     let assets = [];
     while (true) {
@@ -31,7 +31,7 @@ export async function getFioAssets(id) {
     return assets.length > 1 ? assets : assets[0];
 }
 
-export async function createFioFolder(parent, name) {
+async function createFioFolder(parent, name) {
     // create folder in frameio
 
     // check if folder already exists
@@ -63,7 +63,7 @@ export async function createFioFolder(parent, name) {
     return data.id;
 }
 
-export async function createFioAsset(name, parent, signedUrl, filesize) {
+async function createFioAsset(name, parent, signedUrl, filesize) {
     // create new single asset
     let path = `https://api.frame.io/v2/assets/${parent}/children`;
     const body = JSON.stringify({
@@ -85,3 +85,9 @@ export async function createFioAsset(name, parent, signedUrl, filesize) {
     const resp = await fetch(path, requestOptions);
     return resp.json();
 }
+
+module.exports = {
+    createFioAsset,
+    createFioFolder,
+    getFioAssets
+};

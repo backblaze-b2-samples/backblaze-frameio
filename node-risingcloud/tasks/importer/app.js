@@ -1,9 +1,14 @@
-import {createFioAsset, createFioFolder, getFioAssets} from "./frameio.js";
-import {createB2SignedUrls, getB2Conn} from "./b2.js";
+const fs = require('fs');
+
+const {createFioAsset, createFioFolder, getFioAssets} = require("backblaze-frameio-common/frameio");
+const {getB2Conn, createB2SignedUrls} = require("backblaze-frameio-common/b2");
 
 
-process.on('message', async ({b2path, id, objectSize: filesize}) => {
-    // make sure not importing from UPLOAD_PATH ?
+(async() => {
+    let rawdata = fs.readFileSync('./request.json');
+    console.log(`Request: ${rawdata}`);
+    let {b2path, id, filesize} = JSON.parse(rawdata);
+
     const b2 = getB2Conn();
 
     // We can create the signed URL at the same time as the download folder
@@ -17,13 +22,16 @@ process.on('message', async ({b2path, id, objectSize: filesize}) => {
 
     // remove exports folder name when re-importing
     const name = b2path.replace(process.env.UPLOAD_PATH, '');
-    await Promise.all(promises).then(async (values) => {
+    const output = await Promise.all(promises).then(async (values) => {
         const signedUrl = values[0];
         const parent = values[1];
 
         return createFioAsset(name, parent, signedUrl, filesize);
     });
 
-    console.log('Submitted import: ', b2path);
-    process.exit(0);
-});
+    const response = {b2path, id, filesize, ...output};
+
+    const data = JSON.stringify(response, null, 2);
+    console.log(`Response: ${data}`);
+    fs.writeFileSync('./response.json', data);
+})();

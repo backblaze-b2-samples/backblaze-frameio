@@ -1,8 +1,8 @@
-import pkg from 'aws-sdk';
-const {Endpoint, S3} = pkg;
+const {Endpoint, S3} = require("aws-sdk");
 
-export function getB2Conn() {
+function getB2Conn() {
     const endpoint = new Endpoint('https://' + process.env.BUCKET_ENDPOINT);
+
     //AWS.config.logger = console;
     return new S3({
         endpoint: endpoint,
@@ -14,7 +14,7 @@ export function getB2Conn() {
     });
 }
 
-export async function createB2SignedUrls(b2, key) {
+async function createB2SignedUrls(b2, key) {
     const signedUrlExpiration = 60 * 15; // 60 seconds * minutes
     return b2.getSignedUrl('getObject', {
         Bucket: process.env.BUCKET_NAME,
@@ -23,7 +23,7 @@ export async function createB2SignedUrls(b2, key) {
     });
 }
 
-export async function getB2ObjectSize(b2, key) {
+async function getB2ObjectSize(b2, key) {
     return new Promise((resolve, reject) =>
         b2.headObject({
             Bucket: process.env.BUCKET_NAME,
@@ -37,3 +37,9 @@ export async function getB2ObjectSize(b2, key) {
         })
     );
 }
+
+module.exports = {
+    getB2Conn,
+    createB2SignedUrls,
+    getB2ObjectSize
+};

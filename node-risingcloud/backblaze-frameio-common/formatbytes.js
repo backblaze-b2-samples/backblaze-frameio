@@ -1,4 +1,4 @@
-export function formatBytes(bytes, decimals= 1) {
+function formatBytes(bytes, decimals= 1) {
     if (bytes === 0) return '0 Bytes';
 
     const k = 1000;
@@ -9,3 +9,7 @@ export function formatBytes(bytes, decimals= 1) {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+module.exports = {
+    formatBytes
+};
