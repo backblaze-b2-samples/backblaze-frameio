@@ -8,8 +8,7 @@ RUN npm install
 # copy everything else in
 COPY . .
 
-# jenny
-EXPOSE 8675
+EXPOSE 8888
 
 # command to run our app
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]

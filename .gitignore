@@ -6,3 +6,5 @@ node_modules
 .idea
 risingcloud.yaml
 risingcloud_project.zip
+request.json
+response.json
