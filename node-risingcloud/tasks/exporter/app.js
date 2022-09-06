@@ -2,69 +2,102 @@ const fs = require('fs');
 const stream = require("stream");
 const fetch = require("node-fetch");
 
-const {formatBytes} = require("backblaze-frameio-common/formatbytes");
+const {formatBytes, checkEnvVars} = require("backblaze-frameio-common/utils");
 const {getB2Conn} = require("backblaze-frameio-common/b2");
+const {getFioAssets} = require("backblaze-frameio-common/frameio");
 
+const ENV_VARS = [
+    "QUEUE_SIZE",
+    "PART_SIZE",
+    "BUCKET_NAME",
+    "UPLOAD_PATH",
+    'BUCKET_ENDPOINT',
+    'BUCKET_NAME',
+    "ACCESS_KEY",
+    "SECRET_KEY",
+    "FRAMEIO_TOKEN"
+];
 
 async function streamToB2(b2, url, name, filesize) {
     console.log(`streamToB2: ${url}, ${name}, ${filesize}`);
-    try {
-        const { writeStream, promise } = createB2WriteStream(b2, name, filesize);
 
-        fetch(url)
-            .then((response) => {
-                response.body.pipe(writeStream);
-            });
+    const writeStream = new stream.PassThrough();
 
-        try {
-            await promise;
-            console.log('upload complete: ', name)
-        } catch (error) {
-            console.log('streamToB2 error: ', error);
+    const promise = b2.upload({
+        Bucket: process.env.BUCKET_NAME,
+        Key: process.env.UPLOAD_PATH + name,
+        Body: writeStream,
+        ChecksumAlgorithm: 'SHA1',
+        Metadata: {
+            frameio_name: name,
+            b2_keyid: process.env.ACCESS_KEY
         }
-    } catch(err) {
-        console.log('ERROR streamToB2: ', err, err.stack);
-        throw new Error('streamToB2: ', err);
-    }
+    }, {
+        // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
+        // these can be adjusted up for larger machines or
+        // down for small ones (or instances with lots of concurrent users)
+        queueSize: process.env.QUEUE_SIZE,
+        partSize: process.env.PART_SIZE
+    }).on('httpUploadProgress', function(evt) {
+        console.log(name, formatBytes(evt.loaded), '/', formatBytes(filesize));
+    }).promise();
+
+    fetch(url)
+        .then((response) => {
+            response.body.pipe(writeStream);
+        });
+
+    await promise;
+
+    console.log('upload complete: ', name)
+
     return name;
 }
 
-function createB2WriteStream(b2, name, filesize) {
-    const pass = new stream.PassThrough();
+async function createExportList(path, fileTree = '', depth = "asset") {
+    // response may be one or more assets, depending on the path
+    const fioResponse = await getFioAssets(path);
 
-    // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
-    // these can be adjusted up for larger machines or
-    // down for small ones (or instances with lots of concurrent users)
-    const opts = {queueSize: process.env.QUEUE_SIZE, partSize: process.env.PART_SIZE};
-    try {
-        return {
-            writeStream: pass,
-            promise: b2.upload({
-                Bucket: process.env.BUCKET_NAME,
-                Key: process.env.UPLOAD_PATH + name,
-                Body: pass,
-                ChecksumAlgorithm: 'SHA1',
-                Metadata: {
-                    frameio_name: name,
-                    b2_keyid: process.env.ACCESS_KEY
-                }
-            }, opts).on('httpUploadProgress', function(evt) {
-                console.log(name, formatBytes(evt.loaded), '/', formatBytes(filesize));
-            }).promise()
-        };
-    } catch(err) {
-        console.log('createB2WriteStream failed : ', err)
-        throw new Error('createB2WriteStream failed', err);
+    console.log(`processExportList for ${path}, ${fileTree}, ${fioResponse.length}`);
+
+    // If 'project' is selected, initiate a top level project recursion
+    if (depth === 'project') {
+        const asset = fioResponse;
+        return createExportList(asset.project['root_asset_id'] + '/children', asset.project.name + '/');
     }
+
+    const assetList = fioResponse.length ? fioResponse : [fioResponse];
+    const exportList = []
+    for (const asset of assetList) {
+        if (asset.type === 'version_stack' || asset.type === 'folder') {
+            // handle nested folders and version stacks etc
+            exportList.push(...await createExportList(asset.id + '/children', fileTree + asset.name + '/'));
+        } else if (asset.type === 'file') {
+            exportList.push({
+                url: asset['original'],
+                name: fileTree + asset.name,
+                filesize: asset.filesize
+            });
+        } else {
+            console.log(assetList.type, 'unknown type'); // recursive 'if' above should prevent getting here
+            throw('error: unknown type' + fileTree + '/' + assetList.name);
+        }
+    }
+    console.log('list done');
+
+    return exportList;
 }
 
 
 (async() => {
+    checkEnvVars(ENV_VARS);
+
     let rawdata = fs.readFileSync('./request.json');
     console.log(`Request: ${rawdata}`);
     let request = JSON.parse(rawdata);
 
-    const exportList = request['exportList'];
+    const exportList = await createExportList(request['resource']['id'], '', request['data']['depth']);
+
     const promises = []
     const b2 = getB2Conn();
 

@@ -32,17 +32,15 @@ const createError = require("http-errors");
 const fetch = require("node-fetch");
 const compression = require("compression");
 const express = require("express");
+const crypto = require('crypto');
+
 const {getB2Conn, getB2ObjectSize} = require("backblaze-frameio-common/b2");
-const {formatBytes} = require("backblaze-frameio-common/formatbytes");
-const {getFioAssets} = require("backblaze-frameio-common/frameio");
+const {formatBytes, checkEnvVars} = require("backblaze-frameio-common/utils");
 
 const ENV_VARS = [
-    'FRAMEIO_TOKEN',
     'FRAMEIO_SECRET',
     'BUCKET_ENDPOINT',
     'BUCKET_NAME',
-    'ACCESS_KEY',
-    'SECRET_KEY',
     'IMPORTER',
     'IMPORTER_KEY',
     'EXPORTER',
@@ -51,115 +49,12 @@ const ENV_VARS = [
 
 const b2 = getB2Conn();
 
-const app = express();
-// Verify the timestamp and signature before JSON parsing, so we have access to the raw body
-app.use(express.json({verify: verifyTimestampAndSignature}));
-app.use(compression());
-
-app.post('/', [checkContentType, formProcessor], async(req, res) => {
-    let data = req.body.data;
-    let response;
-
-    if (data['depth']) { // user chose export
-        try {
-            const exportList = [];
-            let { name, filesize } = await createExportList(req, exportList);
-
-            // Use a Rising Cloud task for the export, so we don't hang the web server
-            const path = new URL("/risingcloud/jobs", process.env.EXPORTER);
-            const request = { exportList: exportList };
-            console.log('Export request: ', JSON.stringify(request, null, 2));
-            const job = await fetch(path,{
-                method: 'POST',
-                body: JSON.stringify(request),
-                headers: {
-                    "X-RisingCloud-Auth": process.env.EXPORTER_KEY
-                }
-            }).then((response) => response.json());
-            console.log('Export job: ', JSON.stringify(job, null, 2));
-
-            response = {
-                'title': 'Job received!',
-                'description': `Job for '${name.replaceAll('\/', '')}' has been triggered. Total size ${formatBytes(filesize)}`
-            };
-        } catch(err) {
-            console.log('Caught export error in app.post: ', err);
-            response = {
-                'title': 'Error',
-                'description': `${err}`
-            };
-        }
-    } else if (data['b2path']) { // user chose import
-        try {
-            const b2path = req.body.data['b2path'];
-            const filesize = await getB2ObjectSize(b2, b2path);
-
-            // Use a Rising Cloud task for the export, so we don't hang the web server
-            const path = new URL("/risingcloud/jobs", process.env.IMPORTER);
-            const request = {
-                b2path: b2path,
-                id: req.body.resource.id,
-                filesize: filesize
-            };
-            console.log('Import request: ', JSON.stringify(request, null, 2));
-            const job = await fetch(path,{
-                method: 'POST',
-                body: JSON.stringify(request),
-                headers: {
-                    "X-RisingCloud-Auth": process.env.IMPORTER_KEY
-                }
-            }).then((response) => response.json());
-            console.log('Import job: ', JSON.stringify(job, null, 2));
-
-            response = {
-                "title": "Submitted",
-                "description": `Submitted ${formatBytes(filesize)} for import`
-            };
-        } catch (err) {
-            console.log('Caught import error in app.post: ', err);
-            response = {
-                "title": "Error",
-                "description": err['code'] === 'NotFound'
-                    ? `${req.body.data['b2path']} not found`
-                    : err['code']
-            };
-        }
-    }
-
-    if (response) {
-        res.status(202).json(response);
-    } else {
-        res.status(500).json({"title": "Error", "description": 'Unknown stage.'});
-    }
-});
-
-app.listen(8888, () => {
-    checkEnvVars();
-    console.log('Server ready and listening');
-});
-
-
 function checkContentType(req, res, next) {
     if (!req.is('application/json')) {
         console.log(`Bad content type: ${req.get('Content-Type')}`)
         res.sendStatus(400);
     } else {
         next();
-    }
-}
-
-function checkEnvVars() {
-    // make sure the environment variables are set
-    try {
-        ENV_VARS.forEach(element => {
-            console.log('checking: ', element);
-            if (!process.env[element]) {
-                throw(`Environment variable not set: ${element}`);
-            }
-        })
-    } catch(err) {
-        console.log('ERROR checkEnvVars: ', err);
-        throw({'error': 'internal configuration'});
     }
 }
 
@@ -256,63 +151,73 @@ async function formProcessor(req, res, next) {
     }
 }
 
-async function createExportList(req, exportList, fileTree= '') {
-    let resource = req.body.resource;
-    let data = req.body.data;
 
-    const fioResponse = await getFioAssets(resource.id);
+const app = express();
+// Verify the timestamp and signature before JSON parsing, so we have access to the raw body
+app.use(express.json({verify: verifyTimestampAndSignature}));
+app.use(compression());
+
+app.post('/', [checkContentType, formProcessor], async(req, res) => {
+    let data = req.body.data;
     let response;
 
-    console.log(`processExportList for ${resource.id}, ${fileTree}, ${fioResponse.length}`);
-
-    // if 'project' selected, run this once to initiate a top level project recursion
-    if (data.depth === 'project' && ! data.initiated) {
-        const asset = fioResponse;
-        resource.id = asset.project['root_asset_id'] + '/children';
-        fileTree = asset.project.name;
-        data.initiated = true;
-        let l = await createExportList(req, exportList, fileTree + '/');
-        response = { name: asset.project.name, filesize: l.filesize };
-    } else if (fioResponse.length) { // more than one item in the response
-        response = { name: fileTree, filesize: 0 };
-        const assetList = fioResponse;
-        for (const asset of assetList) {
-            if (asset.type === 'version_stack' || asset.type === 'folder') {
-                // handle nested folders and version stacks etc
-                resource.id = asset.id + '/children';
-                let l = await createExportList(req, exportList, fileTree + asset.name + '/');
-                response.filesize += l.filesize;
-            } else if (asset.type === 'file') {
-                exportList.push({
-                    url: asset['original'],
-                    name: fileTree + asset.name,
-                    filesize: asset.filesize
-                });
-                response.filesize += asset.filesize;
-            } else {
-                console.log(assetList.type, 'unknown type'); // recursive 'if' above should prevent getting here
-                throw('error: unknown type' + fileTree + '/' + assetList.name);
+    if (data['depth']) { // user chose export
+        // Use a Rising Cloud task for the export, so we don't hang the web server
+        const path = new URL("/risingcloud/jobs", process.env.EXPORTER);
+        console.log('Export request: ', JSON.stringify(req.body, null, 2));
+        const job = await fetch(path,{
+            method: 'POST',
+            body: JSON.stringify(req.body),
+            headers: {
+                "X-RisingCloud-Auth": process.env.EXPORTER_KEY
             }
-        }
-        console.log('list done');
-    } else { // a single item in the response
-        const asset = fioResponse;
-        if (asset.type === 'file') {
-            exportList.push({
-                url: asset['original'],
-                name: fileTree + asset.name,
-                filesize: asset.filesize
-            });
-            response = { name: asset.name, filesize: asset.filesize };
-        } else if (asset.type === 'version_stack') {
-            resource.id = asset.id + '/children';
-            response = createExportList(req,  fileTree + asset.name + '/');
-        } else {
-            console.log('file type: ', asset.name, asset.type);
-            console.log('type not supported, or not found');
-            throw('error: unknown type' + fileTree + '/' + asset.name);
+        }).then((response) => response.json());
+        console.log('Export job: ', JSON.stringify(job, null, 2));
+
+        response = {
+            'title': 'Job submitted!',
+            'description': `Export job submitted for ${data['depth']}.`
+        };
+    } else if (data['b2path']) { // user chose import
+        try {
+            // Send filesize to the importer
+            req.body.filesize = await getB2ObjectSize(b2, req.body.data['b2path']);
+
+            // Use a Rising Cloud task for the import, so we don't hang the web server
+            const path = new URL("/risingcloud/jobs", process.env.IMPORTER);
+            console.log('Import request: ', JSON.stringify(req.body, null, 2));
+            const job = await fetch(path,{
+                method: 'POST',
+                body: JSON.stringify(req.body),
+                headers: {
+                    "X-RisingCloud-Auth": process.env.IMPORTER_KEY
+                }
+            }).then((response) => response.json());
+            console.log('Import job: ', JSON.stringify(job, null, 2));
+
+            response = {
+                "title": "Job submitted!",
+                "description": `Import job submitted for ${data['b2path']} (${formatBytes(req.body.filesize)})`
+            };
+        } catch (err) {
+            console.log('Caught error in app.post: ', err);
+            response = {
+                "title": "Error",
+                "description": err['code'] === 'NotFound'
+                    ? `${data['b2path']} not found`
+                    : err['code']
+            };
         }
     }
 
-    return response;
-}
+    if (response) {
+        res.status(202).json(response);
+    } else {
+        res.status(500).json({"title": "Error", "description": 'Unknown stage.'});
+    }
+});
+
+app.listen(8888, () => {
+    checkEnvVars(ENV_VARS);
+    console.log('Server ready and listening');
+});

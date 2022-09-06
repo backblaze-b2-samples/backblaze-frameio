@@ -1,4 +1,7 @@
 node_modules
+# Include our local module in the Docker image
+!node_modules/backblaze-frameio-common
 npm-debug.log
 .DS_Store
 default.env
+.env
