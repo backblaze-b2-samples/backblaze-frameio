@@ -10,12 +10,11 @@ const ENV_VARS = [
     "QUEUE_SIZE",
     "PART_SIZE",
     "BUCKET_NAME",
-    "UPLOAD_PATH",
     'BUCKET_ENDPOINT',
-    'BUCKET_NAME',
     "ACCESS_KEY",
     "SECRET_KEY",
-    "FRAMEIO_TOKEN"
+    "FRAMEIO_TOKEN",
+    "UPLOAD_PATH"
 ];
 
 async function streamToB2(b2, url, name, filesize) {
