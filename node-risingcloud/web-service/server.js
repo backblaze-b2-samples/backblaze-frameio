@@ -41,6 +41,8 @@ const ENV_VARS = [
     'FRAMEIO_SECRET',
     'BUCKET_ENDPOINT',
     'BUCKET_NAME',
+    "ACCESS_KEY",
+    "SECRET_KEY",
     'IMPORTER',
     'IMPORTER_KEY',
     'EXPORTER',
