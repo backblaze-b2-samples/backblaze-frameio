@@ -1,0 +1,20 @@
+name: backblaze-frameio-webservice
+url: backblaze-frameio-webservice
+team: 622a848ebffd580024a9d795
+mode: web
+port: 8888
+workspace: Sandbox
+env:
+  BUCKET_ENDPOINT: s3.us-west-004.backblazeb2.com
+  BUCKET_NAME: metadaddy-frameio
+  FRAMEIO_SECRET: AH4Oc9OkTyANKgGYiM8OqqmI8JHHmoZ4XK8z-NOX-TxibN9k_xonfwYtN9aaOZ1c
+  ACCESS_KEY: 00415f935cf4dcb0000000021
+  SECRET_KEY: K004Jl4eQg7GdXGHJbhtpC59xXBJgbk
+  TASK: https://backblaze-frameio-task.risingcloud.app/
+  TASK_KEY: fw0i7j89kicpobjxkeyq57bccwz0whrdmx0m56s
+minWorkers: 1
+maxWorkers: 8
+maxCPU: 1
+maxRAM: 1500
+maxStorage: 4000
+maxConn: 500
