@@ -4,8 +4,9 @@ The Backblaze Custom Action for Frame.io allows you to quickly move data between
 
 ![Frame.io screenshot showing custom action on context menu](images/FrameioCustomAction.png)
 
-The root directory of the backblaze-frameio GitHub repository contains two directories corresponding to different deployment options, plus a directory of common code:
+The root directory of the backblaze-frameio GitHub repository contains two directories corresponding to different deployment options, plus directories containing common code and a test client:
 
 - [node-docker](node-docker) - generic Node.js deployment
 - [node-risingcloud](node-risingcloud) - [Rising Cloud](https://risingcloud.com/) deployment
 - [backblaze-frameio-common](backblaze-frameio-common) - common code to interact with Frame.io, B2
+- [test-client](test-client) - test client to emulate Frame.io sending custom action requests
