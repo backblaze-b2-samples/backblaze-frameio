@@ -1,33 +1,27 @@
 /*
-This code reads a Custom Action POST from frame.io.
-It uses form-based callbacks within frame.io and
-supports single asset, asset stacks, and entire project
-exports to Backblaze B2.
+MIT License
 
-It uses a stream buffer and multipart upload functionality
-to deliver very large files with very low disk and 
-memory requirements. Network IO is generally the deciding
-factor of how fast it will operate.
+Copyright (c) 2022 Backblaze
 
-Current functionality includes verifying the frame.io 
-SHA256 HMAC signature with the Custom Action 'secret', 
-and sending the upload status to console.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-It also requires the documented environment variables
-are set or it will not start the express app. 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-TODO: 
- - Deny imports from the exports folder
- - correct folder pathing on imports
- - import folders 
- - return before tree walk will be faster but won't show size
- - status page? with file list, upload progress, and initiated user
- - upload manager percent stats somewhere? (exist currently per chunk to console)
- - external logging (too much infra)
- - store all metadata somewhere from the fio API calls (b2 metadata?)
- - clean up exit points in createExportList
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 
-*/
 const fetch = require("node-fetch");
 const compression = require("compression");
 const express = require("express");
