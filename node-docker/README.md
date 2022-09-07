@@ -1,4 +1,4 @@
-# Backblaze / Frame.io connector
+# Backblaze Custom Action for Frame.io - Generic Node.js Implementation
 
 This is a Docker version of the 'Archive to Backblaze' connector for Frame.io
 
