@@ -1,8 +1,8 @@
 # Backblaze Custom Action for Frame.io - Rising Cloud Implementation
 
-This is a version of the Backblaze Custom Action for Frame.io implemented to run on [Rising Cloud](https://risingcloud.com/). The custom action is structured as a web service and two tasks: one to export assets from Frame.io to files in Backblaze B2, and another to import files from Backblaze B2 to assets in Frame.io. The web service responds to HTTP requests from Frame.io and starts one of the tasks to handle each request asynchronously.
+This is a version of the Backblaze Custom Action for Frame.io implemented to run on [Rising Cloud](https://risingcloud.com/). The custom action is structured as a web service and a task. The web service responds to HTTP requests from Frame.io and starts the tasks to handle each request asynchronously. The task exports assets from Frame.io to files in Backblaze B2, or imports files from Backblaze B2 to assets in Frame.io depending on the incoming request.
 
-In **Auto Scaling Config** for the web service and the two tasks, set a minimum of 1 worker to be ready to serve requests.
+In **Auto Scaling Config** for the web service and the task, set a minimum of 1 worker to be ready to serve requests.
 
 ***
 
@@ -18,7 +18,5 @@ You need to set the following environment variables in Rising Cloud:
 - DOWNLOAD_PATH = The folder in Frame.io to which files will be downloaded from Backblaze B2. For example, `b2_imports`
 - QUEUE_SIZE = The size of the concurrent queue manager to upload file parts in parallel to Backblaze B2. The uploader will buffer at most queueSize * partSize bytes into memory at any given time. For example, `4`
   PART_SIZE = The size in bytes for each individual part to be uploaded. For example, `5242880`
-- EXPORTER = The URL for the exporter task. For example, `https://my-exporter.risingcloud.app/`
-- EXPORTER_KEY = API key for the exporter
-- IMPORTER = The URL for the importer task. For example, `https://my-importer.risingcloud.app/`
-- IMPORTER_KEY = API key for the importer
+- TASK = The URL for the exporter task. For example, `https://my-task.risingcloud.app/`
+- TASK_KEY = API key for the exporter

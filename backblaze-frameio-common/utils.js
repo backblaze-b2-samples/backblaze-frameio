@@ -25,7 +25,18 @@ function checkEnvVars(env_vars) {
     }
 }
 
+function checkContentType(req, res, next) {
+    if (!req.is('application/json')) {
+        console.log(`Bad content type: ${req.get('Content-Type')}`)
+        res.sendStatus(400);
+    } else {
+        next();
+    }
+}
+
+
 module.exports = {
     formatBytes,
-    checkEnvVars
+    checkEnvVars,
+    checkContentType
 };

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1163.0",
+    "http-errors": "^2.0.0",
     "node-fetch": "^2.6.0"
   }
 }

@@ -4,7 +4,7 @@ node_modules
 .DS_Store
 .env
 .idea
-task.yaml
+risingcloud.yaml
 risingcloud_project.zip
 request.json
 response.json

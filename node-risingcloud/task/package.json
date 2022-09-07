@@ -13,9 +13,6 @@
     "node": ">=18.2.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.1163.0",
-    "node-fetch": "^2.6.0",
-    "stream": "^0.0.2",
     "backblaze-frameio-common": "file:../../backblaze-frameio-common"
   }
 }
