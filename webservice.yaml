@@ -7,7 +7,7 @@ workspace: Sandbox
 env:
   BUCKET_ENDPOINT: s3.us-west-004.backblazeb2.com
   BUCKET_NAME: metadaddy-frameio
-  FRAMEIO_SECRET: AH4Oc9OkTyANKgGYiM8OqqmI8JHHmoZ4XK8z-NOX-TxibN9k_xonfwYtN9aaOZ1c
+  FRAMEIO_SECRET: Vw9nN6AoL-vPZkuJn6CMIZgJcHdTdyJJPsNjdQzs51FMewg8h3BaKnMKztzUmaoP
   ACCESS_KEY: 00415f935cf4dcb0000000021
   SECRET_KEY: K004Jl4eQg7GdXGHJbhtpC59xXBJgbk
   TASK: https://backblaze-frameio-task.risingcloud.app/
