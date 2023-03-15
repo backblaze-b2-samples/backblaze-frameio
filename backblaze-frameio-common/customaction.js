@@ -68,7 +68,7 @@ async function formProcessor(req, res, next) {
         let data = req.body.data;
         console.log(req.body);
 
-        if (!data) { // send user first question
+        if (!data && req.body.type === "import-export") { // send user first question
             formResponse = {
                 "title": "Import or Export?",
                 "description": "Import from Backblaze B2, or export to Backblaze B2?",
@@ -86,7 +86,7 @@ async function formProcessor(req, res, next) {
             return res.json(formResponse);
         }
 
-        if (data['copytype'] === "export") {
+        if ((!data && req.body.type === "export") || data['copytype'] === "export") {
             formResponse = {
                 "title": "Specific Asset(s) or Whole Project?",
                 "description": "Export the specific asset(s) selected or the entire project?",
@@ -102,7 +102,7 @@ async function formProcessor(req, res, next) {
                 }]
             };
             return res.json(formResponse);
-        } else  if (data['copytype'] === "import") {
+        } else if ((!data && req.body.type === "import") || data['copytype'] === "import") {
             // todo : possibly limit importing the export location
             formResponse = {
                 "title": "Enter the location",
@@ -125,17 +125,16 @@ async function formProcessor(req, res, next) {
 
 async function createExportList(path, fileTree = '', depth = "asset") {
     // response may be one or more assets, depending on the path
-    const fioResponse = await getFioAssets(path);
+    const assetList = await getFioAssets(path);
 
-    console.log(`processExportList for ${path}, ${fileTree}, ${fioResponse.length}`);
+    console.log(`createExportList for ${path}, ${fileTree}, ${depth}, ${assetList.length}`);
 
     // If 'project' is selected, initiate a top level project recursion
     if (depth === 'project') {
-        const asset = fioResponse;
+        const asset = assetList[0];
         return createExportList(asset['project']['root_asset_id'] + '/children', asset['project']['name'] + '/');
     }
 
-    const assetList = fioResponse.length ? fioResponse : [fioResponse];
     const exportList = []
     for (const asset of assetList) {
         if (asset.type === 'version_stack' || asset.type === 'folder') {
@@ -148,8 +147,8 @@ async function createExportList(path, fileTree = '', depth = "asset") {
                 filesize: asset.filesize
             });
         } else {
-            console.log(assetList.type, 'unknown type'); // recursive 'if' above should prevent getting here
-            throw('error: unknown type' + fileTree + '/' + assetList.name);
+            console.log('Asset? ', asset); // recursive 'if' above should prevent getting here
+            return Promise.reject(new Error('error: unknown type ' + fileTree + '/' + asset.name));
         }
     }
     console.log('list done');
@@ -189,7 +188,10 @@ async function importFiles(req) {
     }));
 
     // remove exports folder name when re-importing
-    const name = req.data['b2path'].replace(process.env.UPLOAD_PATH, '');
+    let name = req.data['b2path'].replace(process.env.UPLOAD_PATH, '');
+    if (name.startsWith('/')) {
+        name = name.substr(1);
+    }
     const output = await Promise.all(promises).then(async (values) => {
         const signedUrl = values[0];
         const parent = values[1];

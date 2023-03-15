@@ -75,11 +75,11 @@ async function streamToB2(b2, url, name, filesize) {
         ? process.env.UPLOAD_PATH + name
         : process.env.UPLOAD_PATH + '/' + name;
 
+    console.log("Creating upload promise");
     const promise = b2.upload({
         Bucket: process.env.BUCKET_NAME,
         Key: key,
         Body: writeStream,
-        ChecksumAlgorithm: 'SHA1',
         Metadata: {
             frameio_name: name,
             b2_keyid: process.env.ACCESS_KEY
@@ -94,12 +94,20 @@ async function streamToB2(b2, url, name, filesize) {
         console.log(name, formatBytes(evt.loaded), '/', formatBytes(filesize));
     }).promise();
 
+    console.log("Fetching");
     fetch(url)
         .then((response) => {
             response.body.pipe(writeStream);
+        }, reason => {
+            console.log("streamB2 fetch failed: ", reason)
+            throw reason;
         });
 
-    await promise;
+    console.log("Awaiting");
+    await promise.catch(error => {
+        console.log("streamB2 Promise failed: ", error)
+        return error;
+    });
 
     console.log('upload complete: ', name)
 

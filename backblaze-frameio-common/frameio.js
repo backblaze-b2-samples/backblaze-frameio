@@ -40,10 +40,14 @@ async function getFioAssets(id) {
         };
 
         const response = await fetch(path, requestOptions);
-        if (response.length) {
-            assets.push(...response.json());
+        const json = await response.json();
+        if (!response.ok) {
+            return Promise.reject(new Error(json));
+        }
+        if (json.length) {
+            assets.push(...json);
         } else {
-            assets.push(response.json());
+            assets.push(json);
         }
 
         if (response.headers["Page-Number"] === response.headers["Total-Pages"]) {
@@ -52,7 +56,7 @@ async function getFioAssets(id) {
         page++;
     }
 
-    return assets.length > 1 ? assets : assets[0];
+    return assets;
 }
 
 async function createFioFolder(parent, name) {
