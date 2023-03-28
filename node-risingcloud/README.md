@@ -41,7 +41,7 @@ First, clone this repository to your local drive:
 git clone https://github.com/backblaze-b2-samples/backblaze-frameio.git
 ```
 
-In order to run the Rising Cloud commands in this section, you will need to [install](https://risingcloud.com/docs/install) the Rising Cloud Command Line Interface. This program provides you with the utilities to setup the Rising Cloud Task and Web Service, upload the applications to Rising Cloud, setup authentication, and more.
+In order to run the Rising Cloud commands in this section, you will need to [install](https://risingcloud.com/docs/install) the Rising Cloud Command Line Interface. This program provides you with the utilities to setup the Rising Cloud Task and Web Service, uploadUrlToB2 the applications to Rising Cloud, setup authentication, and more.
 
 Login with the email address and password you configured for Rising Cloud:
 

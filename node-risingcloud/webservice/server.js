@@ -22,18 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-const fetch = require("node-fetch");
-const compression = require("compression");
-const express = require("express");
+import fetch from "node-fetch";
+import compression from "compression";
+import express from "express";
 
-const {getB2Conn, getB2ObjectSize} = require("backblaze-frameio-common/b2");
-const {formatBytes, checkEnvVars, checkContentType} = require("backblaze-frameio-common/utils");
-const {
+import {getB2Connection, getB2ObjectSize} from "backblaze-frameio-common/b2";
+import {formatBytes, checkEnvVars, checkContentType} from "backblaze-frameio-common/utils";
+import {
     formProcessor,
     verifyTimestampAndSignature,
     IMPORT,
     EXPORT
-} = require("backblaze-frameio-common/customaction");
+} from "backblaze-frameio-common/customaction";
 
 const ENV_VARS = [
     'FRAMEIO_SECRET',
@@ -45,7 +45,15 @@ const ENV_VARS = [
     'TASK_KEY'
 ];
 
-const b2 = getB2Conn();
+const endpoint = process.env.BUCKET_ENDPOINT;
+const b2 = getB2Connection({
+    endpoint: endpoint,
+    maxAttempts: process.env.MAX_RETRIES || 10,
+    credentials : {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_KEY,
+    },
+});
 
 const app = express();
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body
@@ -61,7 +69,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     try {
         if (task === IMPORT) {
             // Check file exists in B2, and get its size
-            req.body.filesize = await getB2ObjectSize(b2, req.body.data['b2path']);
+            req.body.filesize = await getB2ObjectSize(b2, process.env.BUCKET_NAME, req.body.data['b2path']);
         }
 
         // Use a Rising Cloud task, so we don't hang the web server

@@ -1,0 +1,29 @@
+name:
+url:
+team:
+mode: risingcloud
+workspace:
+from: ubuntu:22.04
+build: []
+deps:
+  - curl -sL https://deb.nodesource.com/setup_18.x -o nodesource_setup.sh
+  - bash nodesource_setup.sh
+  - apt-get install -y nodejs
+  - node -v
+  - bash -c "(cd node-risingcloud/task; npm install)"
+daemons: []
+run: node node-risingcloud/task/app.js
+timeout: 300000
+env:
+  BUCKET_NAME:
+  BUCKET_ENDPOINT:
+  ACCESS_KEY:
+  SECRET_KEY:
+  QUEUE_SIZE:
+  PART_SIZE:
+  FRAMEIO_TOKEN:
+  UPLOAD_PATH: fio_exports
+  DOWNLOAD_PATH: b2_imports
+minWorkers: 1
+maxWorkers: 8
+maxStorage: 4000

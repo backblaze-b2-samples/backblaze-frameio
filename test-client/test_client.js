@@ -21,22 +21,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+import fetch from "node-fetch";
+import fs from "fs";
+import crypto from 'crypto';
+import {parseArgs} from 'node:util';
 
-const fetch = require("node-fetch");
-const fs = require("fs");
-const crypto = require('crypto');
+const {
+    values: { timestamp, requestFilename },
+    positionals: [ url ],
+} = parseArgs({
+    options: {
+        timestamp: {
+            type: "string",
+            short: "t",
+        },
+        requestFilename: {
+            type: "string",
+            short: "f",
+            default: "request.json",
+        },
+    },
+    allowPositionals: true,
+});
 
-const args = process.argv.slice(2);
-const url = args[0];
 
 // Epoch time in seconds
-const timestamp = args.length > 1 ? parseInt(args[1]) : Math.round(Date.now() / 1000);
+const time = timestamp ? parseInt(timestamp) : Math.round(Date.now() / 1000);
 
-const body = fs.readFileSync('./request.json');
+const body = fs.readFileSync(requestFilename);
 console.log(`Request: ${body}`);
 
 // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
-const stringToSign = 'v0:' + timestamp + ':' + body;
+const stringToSign = 'v0:' + time + ':' + body;
 const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
 const signature = 'v0=' + hmac.update(stringToSign).digest('hex');
 
@@ -46,7 +62,7 @@ fetch(url, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
-        'X-Frameio-Request-Timestamp': timestamp,
+        'X-Frameio-Request-Timestamp': time,
         'X-Frameio-Signature': signature
     },
     body: body
