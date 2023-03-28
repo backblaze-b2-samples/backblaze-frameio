@@ -1,0 +1,20 @@
+name:
+url:
+team:
+mode: web
+port: 8888
+workspace:
+env:
+  BUCKET_ENDPOINT:
+  BUCKET_NAME:
+  FRAMEIO_SECRET:
+  ACCESS_KEY:
+  SECRET_KEY:
+  TASK:
+  TASK_KEY:
+minWorkers: 1
+maxWorkers: 8
+maxCPU: 1
+maxRAM: 1500
+maxStorage: 4000
+maxConn: 500

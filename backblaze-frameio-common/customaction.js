@@ -22,15 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-const createError = require("http-errors");
-const crypto = require('crypto');
-const {getFioAssets, createFioFolder, createFioAsset} = require("./frameio");
-const {getB2Conn, streamToB2, createB2SignedUrls} = require("./b2");
+import createError from "http-errors" ;
+import crypto from 'crypto' ;
+import {getFioAsset, getFioAssets, getFioFolder, createFioFolder, createFioAsset} from "./frameio.js" ;
+import {getB2Connection, uploadUrlToB2, createB2SignedUrl} from "./b2.js" ;
 
-const IMPORT = 'Import';
-const EXPORT = 'Export';
+export const IMPORT = 'Import';
+export const EXPORT = 'Export';
 
-function verifyTimestampAndSignature(req, res, buf, encoding) {
+export const ENV_VARS = [
+    { varName: 'FRAMEIO_TOKEN', optional: false, display: false },
+    { varName: 'FRAMEIO_SECRET', optional: false, display: false },
+    { varName: 'BUCKET_ENDPOINT', optional: false, display: true },
+    { varName: 'BUCKET_NAME', optional: false, display: true },
+    { varName: 'ACCESS_KEY', optional: false, display: true },
+    { varName: 'SECRET_KEY', optional: false, display: false },
+    { varName: 'UPLOAD_PATH', optional: false, display: true },
+    { varName: 'DOWNLOAD_PATH', optional: false, display: true },
+    { varName: 'QUEUE_SIZE', optional: true, display: true },
+    { varName: 'PART_SIZE', optional: true, display: true },
+    { varName: 'MAX_RETRIES', optional: true, display: true }
+];
+
+const b2Options = {
+    endpoint: process.env.BUCKET_ENDPOINT,
+    maxRetries: process.env.MAX_RETRIES || 10,
+    credentials : {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_KEY,
+    },
+}
+
+export function verifyTimestampAndSignature(req, res, buf) {
     // X-Frameio-Request-Timestamp header from incoming request
     const timestamp = req.header('X-Frameio-Request-Timestamp');
     // Epoch time in seconds
@@ -49,7 +72,7 @@ function verifyTimestampAndSignature(req, res, buf, encoding) {
     }
 
     // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
-    const body = buf.toString(encoding);
+    const body = buf.toString();
     const stringToSign = 'v0:' + timestamp + ':' + body;
     const hmac = crypto.createHmac('sha256', process.env.FRAMEIO_SECRET);
     const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
@@ -60,7 +83,7 @@ function verifyTimestampAndSignature(req, res, buf, encoding) {
     }
 }
 
-async function formProcessor(req, res, next) {
+export async function formProcessor(req, res, next) {
     // frame.io callback form logic
     let formResponse;
 
@@ -119,24 +142,24 @@ async function formProcessor(req, res, next) {
         next();
     } catch (err) {
         console.log('ERROR formProcessor: ', err, err.stack);
-        throw new Error('ERROR formProcessor', err);
+        throw new Error('ERROR formProcessor', { cause: err });
     }
 }
 
 async function createExportList(path, fileTree = '', depth = "asset") {
-    // response may be one or more assets, depending on the path
-    const assetList = await getFioAssets(path);
+    const assetIterator = await getFioAssets(path);
 
-    console.log(`createExportList for ${path}, ${fileTree}, ${depth}, ${assetList.length}`);
+    console.log(`createExportList for ${path}, ${fileTree ? fileTree : "[no filetree]"}, ${depth}`);
 
     // If 'project' is selected, initiate a top level project recursion
     if (depth === 'project') {
-        const asset = assetList[0];
+        const asset = (await assetIterator.next()).value;
+        console.log(asset);
         return createExportList(asset['project']['root_asset_id'] + '/children', asset['project']['name'] + '/');
     }
 
     const exportList = []
-    for (const asset of assetList) {
+    for await (const asset of assetIterator) {
         if (asset.type === 'version_stack' || asset.type === 'folder') {
             // handle nested folders and version stacks etc
             exportList.push(...await createExportList(asset.id + '/children', fileTree + asset.name + '/'));
@@ -151,68 +174,70 @@ async function createExportList(path, fileTree = '', depth = "asset") {
             return Promise.reject(new Error('error: unknown type ' + fileTree + '/' + asset.name));
         }
     }
-    console.log('list done');
 
     return exportList;
 }
 
-async function exportFiles(request) {
+export async function exportFiles(request) {
     const exportList = await createExportList(request['resource']['id'], '', request['data']['depth']);
 
-    const promises = []
-    const b2 = getB2Conn();
+    const b2 = getB2Connection(b2Options);
 
-    for (const entry of exportList) {
-        promises.push(streamToB2(b2, entry.url, entry.name, entry.filesize));
-    }
-
-    const results = await Promise.allSettled(promises);
-
+    const queueSize = parseInt(process.env.QUEUE_SIZE, 10);
+    const partSize = parseInt(process.env.PART_SIZE, 10);
     const output = []
-    for (let i = 0; i < exportList.length; i++) {
-        output.push({...exportList[i], ...results[i]})
+    for (const entry of exportList) {
+        const key = (process.env.UPLOAD_PATH + '/' + entry.name).replace('//', '/');
+
+        await uploadUrlToB2({
+            client: b2,
+            url: entry.url,
+            bucket: process.env.BUCKET_NAME,
+            key,
+            name: entry.name,
+            totalBytes: entry.filesize,
+            queueSize,
+            partSize,
+            metadata: {
+                frameio_name: entry.name,
+                b2_keyid: process.env.ACCESS_KEY
+            },
+        });
+        output.push(entry)
     }
     return output;
 }
 
-async function importFiles(req) {
-    const b2 = getB2Conn();
+export async function importFiles(req) {
+    const b2 = getB2Connection(b2Options);
 
     // We can create the signed URL at the same time as the download folder
     const promises = [];
-    promises.push(createB2SignedUrls(b2, req.data['b2path']));
-    promises.push(getFioAssets(req.resource.id).then((asset) => {
+    promises.push(createB2SignedUrl(b2, process.env.BUCKET_NAME, req.data['b2path'],
+        process.env.SIGNED_URL_EXPIRATION || 86400));
+    promises.push(getFioAsset(req.resource.id).then(async (asset) => {
         const rootId = asset['project']['root_asset_id'];
         console.log('root:', rootId);
-        return createFioFolder(rootId, process.env.DOWNLOAD_PATH);
+        const folderId = await getFioFolder(rootId, process.env.DOWNLOAD_PATH);
+        return folderId || createFioFolder(rootId, process.env.DOWNLOAD_PATH);
     }));
 
     // remove exports folder name when re-importing
     let name = req.data['b2path'].replace(process.env.UPLOAD_PATH, '');
     if (name.startsWith('/')) {
-        name = name.substr(1);
+        name = name.substring(1);
     }
     const output = await Promise.all(promises).then(async (values) => {
         const signedUrl = values[0];
-        const parent = values[1];
+        const parent_id = values[1];
 
-        return createFioAsset(name, parent, signedUrl, req.filesize);
+        return createFioAsset(name, parent_id, signedUrl, req.filesize);
     });
 
-    return {
+    return [{
         b2path: req.data['b2path'],
         id: req.resource.id,
         filesize: req.filesize,
         ...output
-    };
+    }];
 }
-
-
-module.exports = {
-    verifyTimestampAndSignature,
-    formProcessor,
-    exportFiles,
-    importFiles,
-    IMPORT,
-    EXPORT
-};
