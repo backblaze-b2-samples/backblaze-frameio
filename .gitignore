@@ -7,5 +7,5 @@ node_modules
 task.yaml
 webservice.yaml
 risingcloud_project.zip
-request.json
-response.json
+*request.json
+*response.json

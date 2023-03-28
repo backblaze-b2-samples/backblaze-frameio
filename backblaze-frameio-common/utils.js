@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-function formatBytes(bytes, decimals= 1) {
+export function formatBytes(bytes, decimals= 1) {
     if (bytes === 0) return '0 Bytes';
 
     const k = 1000;
@@ -34,14 +34,15 @@ function formatBytes(bytes, decimals= 1) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-function checkEnvVars(env_vars) {
-    // make sure the environment variables are set
+export function checkEnvVars(env_vars) {
+    // make sure the necessary environment variables are set
     try {
         env_vars.forEach(element => {
-            console.log('checking: ', element);
-            if (!process.env[element]) {
-                throw(`Environment variable not set: ${element}`);
+            const value = process.env[element.varName];
+            if (!value && !element.optional) {
+                throw(`Environment variable not set: ${element.varName}`);
             }
+            console.log(`${element.varName}=${element.display ? value : "********"}`);
         })
     } catch(err) {
         console.log('ERROR checkEnvVars: ', err);
@@ -49,7 +50,7 @@ function checkEnvVars(env_vars) {
     }
 }
 
-function checkContentType(req, res, next) {
+export function checkContentType(req, res, next) {
     if (!req.is('application/json')) {
         console.log(`Bad content type: ${req.get('Content-Type')}`)
         res.sendStatus(400);
@@ -58,9 +59,6 @@ function checkContentType(req, res, next) {
     }
 }
 
-
-module.exports = {
-    formatBytes,
-    checkEnvVars,
-    checkContentType
-};
+export function parseHrtimeToSeconds(hrtime) {
+    return (hrtime[0] + (hrtime[1] / 1e9)).toFixed(3);
+}

@@ -43,7 +43,7 @@ You need to set the following environment variables in the container environment
 
 - `FRAMEIO_TOKEN` = The Frame.io developer **token** you obtain from https://developer.frame.io/app/tokens
 - `FRAMEIO_SECRET` = the Frame.io Custom Action **secret** you obtain from https://developer.frame.io/app/custom-actions
-- `BUCKET_ENDPOINT` = Your Backblaze B2 S3-compatible endpoint, in the form `s3.REGION.backblazeb2.com`
+- `BUCKET_ENDPOINT` = Your Backblaze B2 S3-compatible endpoint, in the form `https://s3.REGION.backblazeb2.com`
 - `BUCKET_NAME` = Your Backblaze B2 bucket name
 - `ACCESS_KEY` = Your Backblaze B2 access key - it is strongly recommended this is unique for this app
 - `SECRET_KEY` = Your Backblaze B2 secret key - it is strongly recommended this is unique for this app

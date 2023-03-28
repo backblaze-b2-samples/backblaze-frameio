@@ -23,30 +23,30 @@ SOFTWARE.
  */
 
 import {checkContentType, checkEnvVars, formatBytes} from "../backblaze-frameio-common/utils.js";
-import {getB2Conn, getB2ObjectSize} from "../backblaze-frameio-common/b2.js";
+import {getB2Connection, getB2ObjectSize} from "../backblaze-frameio-common/b2.js";
 import {
     formProcessor,
     verifyTimestampAndSignature,
     IMPORT,
-    EXPORT
+    EXPORT,
+    ENV_VARS
 } from "../backblaze-frameio-common/customaction.js"
 
 import compression from "compression";
 import express from "express";
 import {fork} from "child_process";
 
-const ENV_VARS = [
-    'FRAMEIO_TOKEN',
-    'FRAMEIO_SECRET',
-    'BUCKET_ENDPOINT',
-    'BUCKET_NAME',
-    'ACCESS_KEY',
-    'SECRET_KEY',
-    'UPLOAD_PATH',
-    'DOWNLOAD_PATH'
-];
+checkEnvVars(ENV_VARS);
 
-const b2 = getB2Conn();
+const endpoint = process.env.BUCKET_ENDPOINT;
+const b2 = getB2Connection({
+    endpoint,
+    maxAttempts: process.env.MAX_RETRIES || 10,
+    credentials : {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_KEY,
+    },
+});
 
 const app = express();
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body
@@ -64,7 +64,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     try {
         if (task === IMPORT) {
             // Check file exists in B2, and get its size
-            req.body.filesize = await getB2ObjectSize(b2, req.body.data['b2path']);
+            req.body.filesize = await getB2ObjectSize(b2, process.env.BUCKET_NAME, data['b2path']);
         }
 
         // fork a process for the import/export, so we don't hang the web server
@@ -100,6 +100,5 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
 const PORT = process.env.PORT || 8888;
 
 app.listen(PORT, () => {
-    checkEnvVars(ENV_VARS);
     console.log(`Server ready and listening on port ${PORT}`);
 });

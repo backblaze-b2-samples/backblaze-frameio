@@ -22,30 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-const fs = require('fs');
-
-const {checkEnvVars} = require("backblaze-frameio-common/utils");
-const {exportFiles, importFiles} = require("backblaze-frameio-common/customaction")
-
-const ENV_VARS = [
-    "BUCKET_NAME",
-    "BUCKET_ENDPOINT",
-    "ACCESS_KEY",
-    "SECRET_KEY",
-    "QUEUE_SIZE",
-    "PART_SIZE",
-    "FRAMEIO_TOKEN",
-    "DOWNLOAD_PATH",
-    "UPLOAD_PATH"
-];
-
+import fs from 'fs';
+import {checkEnvVars, formatBytes, parseHrtimeToSeconds} from "backblaze-frameio-common/utils";
+import {exportFiles, importFiles, ENV_VARS} from "backblaze-frameio-common/customaction";
 
 (async() => {
     checkEnvVars(ENV_VARS);
 
+    const startTime = process.hrtime();
+    let maxMemoryUsageRss = 0;
+    const interval = setInterval(() => {
+        maxMemoryUsageRss = Math.max(maxMemoryUsageRss, process.memoryUsage.rss());
+    }, 1000);
+
     let rawdata = fs.readFileSync('./request.json');
     console.log(`Request: ${rawdata}`);
-    let request = JSON.parse(rawdata);
+    let request = JSON.parse(rawdata.toString());
 
     const output = (request['data']['depth']) ? await exportFiles(request) : await importFiles(request);
 
@@ -53,6 +45,14 @@ const ENV_VARS = [
     const data = JSON.stringify(response, null, 2);
     console.log(`Response: ${data}`);
     fs.writeFileSync('./response.json', data);
+
+    const bytes = response.map(item => item.filesize).reduce((prev, next) => prev + next);
+    const elapsedSeconds = parseHrtimeToSeconds(process.hrtime(startTime));
+    const rate = (bytes / (elapsedSeconds * 1000000)).toFixed(0);
+    console.log(`${response.length} files, ${bytes} bytes transferred in ${elapsedSeconds} seconds = ${rate} MB/s; exiting.`);
+
+    clearInterval(interval);
+    console.log(`Peak memory usage = ${formatBytes(maxMemoryUsageRss)}`);
 
     console.log("Task complete.")
 })();

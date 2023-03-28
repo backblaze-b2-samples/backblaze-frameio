@@ -22,39 +22,179 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-const {Endpoint, S3} = require("aws-sdk");
-const stream = require("stream");
-const fetch = require("node-fetch");
+import {GetObjectCommand, S3} from "@aws-sdk/client-s3";
+import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
+import stream from "stream";
+import fetch from "node-fetch";
 
-const {formatBytes} = require("./utils");
+import {formatBytes} from "./utils.js";
 
-function getB2Conn() {
-    const endpoint = new Endpoint('https://' + process.env.BUCKET_ENDPOINT);
+class Uploader {
+    // Defaults same as AWS SDK
+    static defaultQueueSize = 4;
+    static minPartSize = 1024 * 1024 * 5;
+    // From S3/B2 specification
+    static maxTotalParts = 10000;
 
-    //AWS.config.logger = console;
+    client;
+    url;
+    bucket;
+    key;
+    metadata;
+    queueSize = Uploader.defaultQueueSize;
+    partSize = Uploader.minPartSize;
+    totalUploadedBytes = 0;
+    totalBytes;
+
+    constructor(options) {
+        Object.assign(this, options)
+        this.validatePartSize();
+        this.adjustPartSize();
+    }
+
+    adjustPartSize() {
+        const newPartSize = Math.ceil(this.totalBytes / Uploader.maxTotalParts);
+        if (newPartSize > this.partSize) {
+            this.partSize = newPartSize;
+        }
+        this.totalParts = Math.ceil(this.totalBytes / this.partSize);
+    }
+
+    validatePartSize() {
+        if (this.partSize < Uploader.minPartSize) {
+            throw new Error('partSize must be greater than ' + Uploader.minPartSize);
+        }
+    }
+
+    async send() {
+        console.log(`Creating multipart upload for ${this.bucket}/${this.key}`);
+        console.log(`Reading ${this.totalBytes} bytes from ${this.url}`);
+        const multipart = await this.client.createMultipartUpload({
+            Bucket: this.bucket,
+            Key: this.key,
+            Metadata: this.metadata,
+        });
+
+        const lastPartSize = this.totalBytes % this.partSize;
+        console.log(`Uploading ${this.totalParts - 1} parts of ${this.partSize} bytes plus 1 part of ${lastPartSize} bytes`)
+
+        const promises = new Map();
+        const completedParts = [];
+        for (let partCount = 0; partCount < this.totalParts; partCount++) {
+            const contentLength = (partCount < (this.totalParts - 1))
+                ? this.partSize
+                : lastPartSize;
+            const partNumber = partCount + 1;
+
+            const writeStream = new stream.PassThrough();
+            const promise = this.client.uploadPart({
+                Bucket: this.bucket,
+                Key: this.key,
+                Body: writeStream,
+                PartNumber: partNumber,
+                ContentLength: contentLength,
+                UploadId: multipart['UploadId']
+            }).then(response => {
+                return {
+                    ...response,
+                    partNumber,
+                    contentLength,
+                };
+            }, reason => {
+                console.log("Uploader.send() - uploadPart() failed: ", reason)
+                throw reason;
+            });
+            promises.set(partNumber, promise);
+
+            const start = partCount * this.partSize;
+            const end = (start + contentLength) - 1;
+            fetch(this.url,{
+                headers: {
+                    'range': `bytes=${start}-${end}`
+                }
+            }).then(response => {
+                if (response.status !== 206) {
+                    const message = `Server for URL ${this.url} does not support range requests`;
+                    console.log("Uploader.send() - " + message);
+                    throw new Error(message)
+                }
+                response.body.pipe(writeStream);
+            }, reason => {
+                console.log("Uploader.send() - fetch() failed: ", reason)
+                throw reason;
+            });
+
+            if (promises.size >= this.queueSize) {
+                // Promise.race() returns the first *settled* promise, so if it is rejected,
+                // the error is thrown from here by await. If we used Promise.any(), the error
+                // would only be thrown if *all* the promises were rejected
+                const part = await Promise.race(Array.from(promises.values()));
+                this.completePart(completedParts, part);
+                promises.delete(part.partNumber);
+            }
+        }
+
+        // Wait for remaining parts to complete uploading
+        const remainingParts = await Promise.all(Array.from(promises.values()));
+        for (const part of remainingParts) {
+            this.completePart(completedParts, part);
+        }
+
+        if (this.totalUploadedBytes !== this.totalBytes) {
+            throw new Error(`Data missing - uploaded ${this.totalUploadedBytes} of ${this.totalBytes} bytes`);
+        }
+
+        console.log(`Completing multipart upload for ${this.bucket}/${this.key}`);
+        return this.client.completeMultipartUpload({
+            Bucket: this.bucket,
+            Key: this.key,
+            UploadId: multipart['UploadId'],
+            MultipartUpload : {
+                Parts: completedParts
+            }
+        }).then(_ => {
+            console.log(`Completed multipart upload of ${this.totalUploadedBytes} bytes to ${this.bucket}/${this.key}`);
+        }, reason => {
+            console.log("Uploader.send() - completeMultipartUpload() failed: ", reason)
+            throw reason;
+        });
+    }
+
+    completePart(completedParts, part) {
+        this.totalUploadedBytes += part.contentLength;
+        console.log(`${this.key}: uploaded part ${part.partNumber}/${this.totalParts} ${formatBytes(this.totalUploadedBytes)}/${formatBytes(this.totalBytes)}`);
+        completedParts[part.partNumber - 1] = {
+            PartNumber: part.partNumber,
+            ETag: part.ETag
+        };
+    }
+}
+
+export function uploadUrlToB2(options) {
+    const uploader = new Uploader(options);
+    return uploader.send();
+}
+
+export function getB2Connection(options) {
     return new S3({
-        endpoint: endpoint,
-        region: process.env.BUCKET_ENDPOINT.replaceAll(/s3\.(.*?)\.backblazeb2\.com/g, '$1'),
-        signatureVersion: 'v4',
         customUserAgent: 'b2-node-docker-0.2',
-        secretAccessKey: process.env.SECRET_KEY,
-        accessKeyId: process.env.ACCESS_KEY
+        region: options.endpoint.replaceAll(/https:\/\/s3\.(.*?)\.backblazeb2\.com/g, '$1'),
+        ...options,
     });
 }
 
-async function createB2SignedUrls(b2, key) {
-    const signedUrlExpiration = 60 * 15; // 60 seconds * minutes
-    return b2.getSignedUrl('getObject', {
-        Bucket: process.env.BUCKET_NAME,
+export async function createB2SignedUrl(client, bucket, key, expiresIn) {
+    const command = new GetObjectCommand({
+        Bucket: bucket,
         Key: key,
-        Expires: signedUrlExpiration
     });
+    return await getSignedUrl(client, command, { expiresIn });
 }
 
-async function getB2ObjectSize(b2, key) {
+export async function getB2ObjectSize(client, bucket, key) {
     return new Promise((resolve, reject) =>
-        b2.headObject({
-            Bucket: process.env.BUCKET_NAME,
+        client.headObject({
+            Bucket: bucket,
             Key: key
         }, (err, response) => {
             if (err) {
@@ -65,59 +205,3 @@ async function getB2ObjectSize(b2, key) {
         })
     );
 }
-
-async function streamToB2(b2, url, name, filesize) {
-    console.log(`streamToB2: ${url}, ${name}, ${filesize}`);
-
-    const writeStream = new stream.PassThrough();
-
-    const key = process.env.UPLOAD_PATH.endsWith('/')
-        ? process.env.UPLOAD_PATH + name
-        : process.env.UPLOAD_PATH + '/' + name;
-
-    console.log("Creating upload promise");
-    const promise = b2.upload({
-        Bucket: process.env.BUCKET_NAME,
-        Key: key,
-        Body: writeStream,
-        Metadata: {
-            frameio_name: name,
-            b2_keyid: process.env.ACCESS_KEY
-        }
-    }, {
-        // the defaults are queueSize 4 and partSize 5mb (vs 100mb)
-        // these can be adjusted up for larger machines or
-        // down for small ones (or instances with lots of concurrent users)
-        queueSize: process.env.QUEUE_SIZE,
-        partSize: process.env.PART_SIZE
-    }).on('httpUploadProgress', function(evt) {
-        console.log(name, formatBytes(evt.loaded), '/', formatBytes(filesize));
-    }).promise();
-
-    console.log("Fetching");
-    fetch(url)
-        .then((response) => {
-            response.body.pipe(writeStream);
-        }, reason => {
-            console.log("streamB2 fetch failed: ", reason)
-            throw reason;
-        });
-
-    console.log("Awaiting");
-    await promise.catch(error => {
-        console.log("streamB2 Promise failed: ", error)
-        return error;
-    });
-
-    console.log('upload complete: ', name)
-
-    return name;
-}
-
-
-module.exports = {
-    getB2Conn,
-    createB2SignedUrls,
-    getB2ObjectSize,
-    streamToB2
-};

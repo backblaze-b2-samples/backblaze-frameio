@@ -23,15 +23,28 @@ SOFTWARE.
  */
 
 import {importFiles, exportFiles} from "../backblaze-frameio-common/customaction.js";
-
+import {formatBytes, parseHrtimeToSeconds} from "../backblaze-frameio-common/utils.js";
 
 process.on('message', async (request) => {
     // Don't need to check environment variables, since the task inherits them from the web service
 
+    const startTime = process.hrtime();
+    let maxMemoryUsageRss = 0;
+    const interval = setInterval(() => {
+        maxMemoryUsageRss = Math.max(maxMemoryUsageRss, process.memoryUsage.rss());
+    }, 1000);
+
     console.log(`Request: ${JSON.stringify(request, null, 2)}`);
     const response = (request['data']['depth']) ? await exportFiles(request) : await importFiles(request);
     console.log(`Response: ${JSON.stringify(response, null, 2)}`);
-    console.log("Task complete; exiting.")
+
+    const bytes = response.map(item => item.filesize).reduce((prev, next) => prev + next);
+    const elapsedSeconds = parseHrtimeToSeconds(process.hrtime(startTime));
+    const rate = (bytes / (elapsedSeconds * 1000000)).toFixed(0);
+    console.log(`${response.length} files, ${bytes} bytes transferred in ${elapsedSeconds} seconds = ${rate} MB/s; exiting.`);
+
+    clearInterval(interval);
+    console.log(`Peak memory usage = ${formatBytes(maxMemoryUsageRss)}`);
 
     process.exit(0);
 });
