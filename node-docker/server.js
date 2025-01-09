@@ -64,12 +64,13 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     try {
         if (task === IMPORT) {
             // Check file exists in B2, and get its size
+            console.log(`Looking for ${data['b2path']} in ${process.env.BUCKET_NAME}`);
             req.body.filesize = await getB2ObjectSize(b2, process.env.BUCKET_NAME, data['b2path']);
         }
 
         // fork a process for the import/export, so we don't hang the web server
-        const process = fork('task.js');
-        process.send(req.body);
+        const childProcess = fork('task.js');
+        childProcess.send(req.body);
 
         response = (task === IMPORT) ? {
             "title": "Job submitted!",
