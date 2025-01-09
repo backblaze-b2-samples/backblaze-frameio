@@ -109,7 +109,7 @@ export async function formProcessor(req, res, next) {
             return res.json(formResponse);
         }
 
-        if ((!data && req.body.type === "export") || data['copytype'] === "export") {
+        if ((!data && req.body.type === "export") || (data && data['copytype'] === "export")) {
             formResponse = {
                 "title": "Specific Asset(s) or Whole Project?",
                 "description": "Export the specific asset(s) selected or the entire project?",
@@ -125,7 +125,7 @@ export async function formProcessor(req, res, next) {
                 }]
             };
             return res.json(formResponse);
-        } else if ((!data && req.body.type === "import") || data['copytype'] === "import") {
+        } else if ((!data && req.body.type === "import") || (data && data['copytype'] === "import")) {
             // todo : possibly limit importing the export location
             formResponse = {
                 "title": "Enter the location",
