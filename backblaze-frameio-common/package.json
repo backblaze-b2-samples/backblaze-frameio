@@ -1,5 +1,5 @@
 {
-  "name": "backblaze-frameio-common",
+  "name": "@backblaze-b2-samples/backblaze-frameio-common",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
