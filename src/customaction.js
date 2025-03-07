@@ -90,6 +90,10 @@ export async function formProcessor(req, res, next) {
     try {
         let data = req.body.data;
 
+        if (!data || data['copytype']) {
+            console.log(`Form processor request: ${JSON.stringify(req.body, null, 2)}`);
+        }
+
         if (!data && req.body.type === "import-export") { // send user first question
             formResponse = {
                 "title": "Import or Export?",

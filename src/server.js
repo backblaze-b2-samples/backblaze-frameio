@@ -62,7 +62,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     let data = req.body.data;
     let response;
 
-    console.log(`Request: ${JSON.stringify(req.body, null, 2)}`);
+    console.log(`Server request: ${JSON.stringify(req.body, null, 2)}`);
 
     try {
         const task = data['b2path'] ? IMPORT : EXPORT;
