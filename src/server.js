@@ -92,9 +92,9 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
         console.log('Caught error in app.post: ', err);
         response = {
             "title": "Error",
-            "description": err['code'] === 'NotFound'
+            "description": err['name'] === 'NotFound'
                 ? `${data['b2path']} not found`
-                : err['code']
+                : err['name']
         };
     }
 
