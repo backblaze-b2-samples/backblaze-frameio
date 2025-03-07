@@ -186,6 +186,7 @@ export async function createFioAsset(name, parent_id, signedUrl, filesize) {
         'filesize': filesize,
         'name': name,
         'type': 'file',
+
         'source': {'url': signedUrl}
     });
     return fetchJson(path, {
