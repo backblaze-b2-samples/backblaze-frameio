@@ -94,7 +94,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
         };
     }
 
-    console.log(`Response: ${JSON.stringify(response, null, 2)}`);
+    console.log(`Server response: ${JSON.stringify(response, null, 2)}`);
 
     if (response) {
         res.status(202).json(response);
