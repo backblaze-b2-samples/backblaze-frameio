@@ -26,6 +26,7 @@ import createError from "http-errors" ;
 import crypto from 'crypto' ;
 import {getFioAsset, getFioAssets, getFioFolder, createFioFolder, createFioAsset} from "./frameio.js" ;
 import {getB2Connection, uploadUrlToB2, createB2SignedUrl} from "./b2.js" ;
+import path from "path";
 
 export const IMPORT = 'Import';
 export const EXPORT = 'Export';
@@ -183,7 +184,7 @@ export async function exportFiles(request) {
     const partSize = parseInt(process.env.PART_SIZE, 10);
     const output = []
     for (const entry of exportList) {
-        const key = (process.env.UPLOAD_PATH + '/' + entry.name).replace('//', '/');
+        const key = path.posix.join(process.env.UPLOAD_PATH, entry.name);
 
         await uploadUrlToB2({
             client: b2,
