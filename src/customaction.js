@@ -33,25 +33,18 @@ export const EXPORT = 'Export';
 export const ENV_VARS = [
     { varName: 'FRAMEIO_TOKEN', optional: false, display: false },
     { varName: 'FRAMEIO_SECRET', optional: false, display: false },
-    { varName: 'BUCKET_ENDPOINT', optional: false, display: true },
+    { varName: 'AWS_ENDPOINT_URL', optional: true, display: true },
+    { varName: 'AWS_ACCESS_KEY_ID', optional: true, display: true },
+    { varName: 'AWS_SECRET_ACCESS_KEY', optional: true, display: false },
+    { varName: 'AWS_REGION', optional: true, display: true },
+    { varName: 'AWS_MAX_ATTEMPTS', optional: true, display: true },
+    { varName: 'AWS_PROFILE', optional: true, display: true },
     { varName: 'BUCKET_NAME', optional: false, display: true },
-    { varName: 'ACCESS_KEY', optional: false, display: true },
-    { varName: 'SECRET_KEY', optional: false, display: false },
     { varName: 'UPLOAD_PATH', optional: false, display: true },
     { varName: 'DOWNLOAD_PATH', optional: false, display: true },
     { varName: 'QUEUE_SIZE', optional: true, display: true },
-    { varName: 'PART_SIZE', optional: true, display: true },
-    { varName: 'MAX_RETRIES', optional: true, display: true }
+    { varName: 'PART_SIZE', optional: true, display: true }
 ];
-
-const b2Options = {
-    endpoint: process.env.BUCKET_ENDPOINT,
-    maxRetries: process.env.MAX_RETRIES || 10,
-    credentials : {
-        accessKeyId: process.env.ACCESS_KEY,
-        secretAccessKey: process.env.SECRET_KEY,
-    },
-}
 
 export function verifyTimestampAndSignature(req, res, buf) {
     // X-Frameio-Request-Timestamp header from incoming request
@@ -184,7 +177,7 @@ async function createExportList(path, fileTree = '', depth = "asset") {
 export async function exportFiles(request) {
     const exportList = await createExportList(request['resource']['id'], '', request['data']['depth']);
 
-    const b2 = getB2Connection(b2Options);
+    const b2 = getB2Connection();
 
     const queueSize = parseInt(process.env.QUEUE_SIZE, 10);
     const partSize = parseInt(process.env.PART_SIZE, 10);
@@ -212,7 +205,7 @@ export async function exportFiles(request) {
 }
 
 export async function importFiles(req) {
-    const b2 = getB2Connection(b2Options);
+    const b2 = getB2Connection();
 
     // We can create the signed URL at the same time as the download folder
     const promises = [];

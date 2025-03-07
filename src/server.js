@@ -47,15 +47,13 @@ import 'dotenv/config';
 
 checkEnvVars(ENV_VARS);
 
-const endpoint = process.env.BUCKET_ENDPOINT;
-const b2 = getB2Connection({
-    endpoint,
-    maxAttempts: process.env.MAX_RETRIES || 10,
-    credentials : {
-        accessKeyId: process.env.ACCESS_KEY,
-        secretAccessKey: process.env.SECRET_KEY,
-    },
-});
+const DEFAULT_MAX_ATTEMPTS = 10;
+if (!('AWS_MAX_ATTEMPTS' in process.env)) {
+    console.log(`Setting AWS_MAX_ATTEMPTS to ${DEFAULT_MAX_ATTEMPTS}`)
+    process.env['AWS_MAX_ATTEMPTS'] = DEFAULT_MAX_ATTEMPTS;
+}
+
+const b2 = getB2Connection();
 
 const app = express();
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body

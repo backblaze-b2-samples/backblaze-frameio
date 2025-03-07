@@ -176,11 +176,7 @@ export function uploadUrlToB2(options) {
 }
 
 export function getB2Connection(options) {
-    return new S3({
-        customUserAgent: 'b2-node-docker-0.2',
-        region: options.endpoint.replaceAll(/https:\/\/s3\.(.*?)\.backblazeb2\.com/g, '$1'),
-        ...options,
-    });
+    return new S3({customUserAgent: 'b2-node-docker-0.2'});
 }
 
 export async function createB2SignedUrl(client, bucket, key, expiresIn) {
