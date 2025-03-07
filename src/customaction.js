@@ -144,8 +144,8 @@ export async function formProcessor(req, res, next) {
 
         next();
     } catch (err) {
-        console.log('ERROR formProcessor: ', err, err.stack);
-        throw new Error('ERROR formProcessor', { cause: err });
+        console.log('Caught error in formProcessor: ', err);
+        throw new Error('Caught error in formProcessor', { cause: err });
     }
 }
 

@@ -35,6 +35,12 @@ import {
 import compression from "compression";
 import express from "express";
 import {fork} from "child_process";
+import {fileURLToPath} from 'url';
+import path from 'path';
+
+// See https://stackoverflow.com/a/72462507/33905
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env file - useful for testing
 import 'dotenv/config';
@@ -74,7 +80,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
         }
 
         // fork a process for the import/export, so we don't hang the web server
-        const childProcess = fork('task.js');
+        const childProcess = fork(path.join(__dirname, 'task.js'));
         childProcess.send(req.body);
 
         response = (task === IMPORT) ? {
