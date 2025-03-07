@@ -22,19 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import {checkContentType, checkEnvVars, formatBytes} from "../backblaze-frameio-common/utils.js";
-import {getB2Connection, getB2ObjectSize} from "../backblaze-frameio-common/b2.js";
+import {checkContentType, checkEnvVars, formatBytes} from "./utils.js";
+import {getB2Connection, getB2ObjectSize} from "./b2.js";
 import {
     formProcessor,
     verifyTimestampAndSignature,
     IMPORT,
     EXPORT,
     ENV_VARS
-} from "../backblaze-frameio-common/customaction.js"
+} from "./customaction.js"
 
 import compression from "compression";
 import express from "express";
 import {fork} from "child_process";
+
+// Load environment variables from .env file - useful for testing
+import 'dotenv/config';
 
 checkEnvVars(ENV_VARS);
 
@@ -54,14 +57,16 @@ app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
 app.post('/', [checkContentType, formProcessor], async(req, res) => {
+    // formProcessor runs the Frame.io custom action dialog, so, by the time we get here, the request should contain
+    //
     let data = req.body.data;
     let response;
 
     console.log(`Request: ${JSON.stringify(req.body, null, 2)}`);
 
-    const task = data['b2path'] ? IMPORT : EXPORT;
-
     try {
+        const task = data['b2path'] ? IMPORT : EXPORT;
+
         if (task === IMPORT) {
             // Check file exists in B2, and get its size
             console.log(`Looking for ${data['b2path']} in ${process.env.BUCKET_NAME}`);

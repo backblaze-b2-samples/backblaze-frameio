@@ -1,7 +1,4 @@
-**/node_modules
-**/npm-debug.log
-**/.DS_Store
-**/default.env
-**/.env
-**/request.json
-**/response.json
+node_modules
+npm-debug.log
+.DS_Store
+default.env

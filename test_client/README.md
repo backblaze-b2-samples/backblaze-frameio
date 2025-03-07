@@ -2,19 +2,15 @@
 
 This directory contains a simple test client that you can use emulate custom action requests sent from Frame.io. The test client reads in its request body from a file, signs the request and sends it to the URL you specify on its command line.
 
-To install dependencies (you only need to do this once):
-
-- `npm install` 
-
 To run the test client:
 
-- Create a file named `request.json`, containing the payload to send to the web service. The minimal payload is an empty JSON object:
+- Create a file named `request.json`, containing the payload to send to the web service. The minimal payload contains the plugin event name, for example:
   ```json
-  {}
+  {"type": "import-export"}
   ```
-- Run the test client, supplying your Frame.io custom action secret and the web service URL on the command line. For example, if you deployed the custom action code to Rising Cloud:
+- Run the test client, supplying your Frame.io custom action secret and the web service URL on the command line:
   ```bash
-  FRAMEIO_SECRET=<your secret> node test_client.js https://$WEB_SERVICE.risingcloud.app
+  FRAMEIO_SECRET=<your secret> node test_client/test_client.js https://my.endpoint.com/
   ```
 If all is well, the web service will respond with a JSON form:
 

@@ -89,7 +89,6 @@ export async function formProcessor(req, res, next) {
 
     try {
         let data = req.body.data;
-        console.log(req.body);
 
         if (!data && req.body.type === "import-export") { // send user first question
             formResponse = {

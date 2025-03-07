@@ -1,16 +1,14 @@
 FROM node:alpine
 
-# Copy in package files and .npmrc, then run npm
 WORKDIR /srv
-COPY node-risingcloud/webservice/package*.json node-risingcloud/webservice/.npmrc node-risingcloud/webservice/
-COPY backblaze-frameio-common ./backblaze-frameio-common
 
-WORKDIR /srv/node-risingcloud/webservice
+COPY package*.json ./
 RUN npm install
 
-COPY node-risingcloud/webservice .
+# copy everything else in
+COPY . .
 
 EXPOSE 8888
 
 # command to run our app
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]

@@ -22,12 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import fs from 'fs';
-import {checkEnvVars, formatBytes, parseHrtimeToSeconds} from "backblaze-frameio-common/utils";
-import {exportFiles, importFiles, ENV_VARS} from "backblaze-frameio-common/customaction";
+import {importFiles, exportFiles} from "./customaction.js";
+import {formatBytes, parseHrtimeToSeconds} from "./utils.js";
 
-(async() => {
-    checkEnvVars(ENV_VARS);
+process.on('message', async (request) => {
+    // Don't need to check environment variables, since the task inherits them from the web service
 
     const startTime = process.hrtime();
     let maxMemoryUsageRss = 0;
@@ -35,16 +34,9 @@ import {exportFiles, importFiles, ENV_VARS} from "backblaze-frameio-common/custo
         maxMemoryUsageRss = Math.max(maxMemoryUsageRss, process.memoryUsage.rss());
     }, 1000);
 
-    let rawdata = fs.readFileSync('./request.json');
-    console.log(`Request: ${rawdata}`);
-    let request = JSON.parse(rawdata.toString());
-
-    const output = (request['data']['depth']) ? await exportFiles(request) : await importFiles(request);
-
-    let response = {"exportList": output};
-    const data = JSON.stringify(response, null, 2);
-    console.log(`Response: ${data}`);
-    fs.writeFileSync('./response.json', data);
+    console.log(`Request: ${JSON.stringify(request, null, 2)}`);
+    const response = (request['data']['depth']) ? await exportFiles(request) : await importFiles(request);
+    console.log(`Response: ${JSON.stringify(response, null, 2)}`);
 
     const bytes = response.map(item => item.filesize).reduce((prev, next) => prev + next);
     const elapsedSeconds = parseHrtimeToSeconds(process.hrtime(startTime));
@@ -54,5 +46,6 @@ import {exportFiles, importFiles, ENV_VARS} from "backblaze-frameio-common/custo
     clearInterval(interval);
     console.log(`Peak memory usage = ${formatBytes(maxMemoryUsageRss)}`);
 
-    console.log("Task complete.")
-})();
+    process.exit(0);
+});
+
