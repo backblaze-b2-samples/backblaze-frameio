@@ -71,8 +71,6 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
 
     try {
         const bucket = process.env.BUCKET_NAME;
-        let totalSize = 0;
-
         if ('proceed' in req.body['data']) {
             // Get the saved data
             const proceed = req.body['data']['proceed']
@@ -91,12 +89,13 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
             const [count, totalSize, isPrefix] = await getB2ObjectSize(b2, bucket, req.body['data']['b2path']);
 
             req.body['data']['isPrefix'] = isPrefix;
+            req.body['data']['totalSize'] = totalSize;
             if (count > 1) {
                 interactions.set(interaction_id, req.body['data']);
                 // Ask the user if they want to go ahead
                 res.json({
                     "title": "Bulk Import",
-                    "description": `${bucket}/${req.body['data']['b2path']} contains ${count} files with total size ${formatBytes(totalSize)} bytes.`,
+                    "description": `${bucket}/${req.body['data']['b2path']} contains ${count} files with total size ${formatBytes(totalSize)}.`,
                     "fields": [{
                         "type": "select",
                         "label": "Proceed with the import?",
@@ -120,7 +119,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
 
         response = (task === IMPORT) ? {
             "title": "Job submitted!",
-            "description": `Import job submitted for ${bucket}/${req.body['data']['b2path']} (${formatBytes(totalSize)} bytes)`
+            "description": `Import job submitted for ${bucket}/${req.body['data']['b2path']} (${formatBytes(req.body['data']['totalSize'])})`
         } : {
             'title': 'Job submitted!',
             'description': `Export job submitted for ${req.body['data']['depth']}.`

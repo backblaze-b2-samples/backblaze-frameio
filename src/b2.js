@@ -175,7 +175,7 @@ export function uploadUrlToB2(options) {
     return uploader.send();
 }
 
-export function getB2Connection(options) {
+export function getB2Connection() {
     return new S3({customUserAgent: 'b2-node-docker-0.2'});
 }
 
