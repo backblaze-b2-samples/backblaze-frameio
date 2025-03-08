@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import {GetObjectCommand, S3} from "@aws-sdk/client-s3";
+import {GetObjectCommand, S3, paginateListObjectsV2, HeadObjectCommand, NotFound} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
 import stream from "stream";
 import fetch from "node-fetch";
@@ -179,25 +179,52 @@ export function getB2Connection(options) {
     return new S3({customUserAgent: 'b2-node-docker-0.2'});
 }
 
-export async function createB2SignedUrl(client, bucket, key, expiresIn) {
+export async function createB2SignedUrl(client, bucket, key) {
     const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
     });
-    return await getSignedUrl(client, command, { expiresIn });
+    return await getSignedUrl(client, command, { expiresIn: process.env.SIGNED_URL_EXPIRATION || 86400 });
 }
 
 export async function getB2ObjectSize(client, bucket, key) {
-    return new Promise((resolve, reject) =>
-        client.headObject({
-            Bucket: bucket,
-            Key: key
-        }, (err, response) => {
-            if (err) {
-                reject(err);
+    let prefix;
+    if (key.endsWith('/')) {
+        // The key ends with a slash - just use it as a prefix for listing objects
+        prefix = key;
+    } else {
+        // If the key doesn't end with a slash, try to find it as an object
+        console.log(`getB2ObjectSize looking for ${key} with HeadObject`)
+        try {
+            const response = await client.send(new HeadObjectCommand({
+                Bucket: bucket,
+                Key: key
+            }))
+            console.log(`getB2ObjectSize found ${key} with HeadObject, size: ${response['ContentLength']}`)
+            return [1, response['ContentLength'], false];
+        } catch (e) {
+            if (e instanceof NotFound) {
+                console.log(`getB2ObjectSize couldn't find ${key} with HeadObject`)
+                // If the user entered 'foo', we want to find everything under 'foo/',
+                // but we don't want to find 'foobar', so add a slash
+                prefix = key + '/'
             } else {
-                resolve(response['ContentLength']);
+                throw e;
             }
-        })
+        }
+    }
+
+    // The key ends with a slash, or we couldn't find it as an object.
+    const paginator = paginateListObjectsV2(
+        {client},
+        {Bucket: bucket, Prefix: prefix}
     );
+    let count = 0;
+    let totalSize = 0;
+    for await (const { Contents } of paginator) {
+        count += Contents.length;
+        totalSize += Contents.reduce((n, {Size}) => n + Size, 0);
+    }
+    console.log(`getB2ObjectSize found ${count} files with ListObjectsV2, total size: ${totalSize}`);
+    return [count, totalSize, true];
 }

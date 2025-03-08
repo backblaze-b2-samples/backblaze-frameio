@@ -60,22 +60,59 @@ const app = express();
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
+// Map of interaction IDs to data so we can save the filename across actions
+const interactions = new Map();
+
 app.post('/', [checkContentType, formProcessor], async(req, res) => {
-    // formProcessor runs the Frame.io custom action dialog, so, by the time we get here, the request should contain
-    //
-    let data = req.body.data;
+    const interaction_id = req.body['interaction_id'];
     let response;
 
     console.log(`Server request: ${JSON.stringify(req.body, null, 2)}`);
 
     try {
-        const task = data['b2path'] ? IMPORT : EXPORT;
+        const bucket = process.env.BUCKET_NAME;
+        let totalSize = 0;
 
-        if (task === IMPORT) {
+        if ('proceed' in req.body['data']) {
+            // Get the saved data
+            const proceed = req.body['data']['proceed']
+            req.body['data'] = interactions.get(interaction_id);
+            interactions.delete(interaction_id);
+            if (proceed === 'yes') {
+                console.log(`User proceeding with import of ${req.body['data']['b2path']}`)
+            } else {
+                console.log(`User canceling import of ${req.body['data']['b2path']}`)
+                res.status(204);
+                return
+            }
+        } else if ('b2path' in req.body['data']) {
             // Check file exists in B2, and get its size
-            console.log(`Looking for ${data['b2path']} in ${process.env.BUCKET_NAME}`);
-            req.body.filesize = await getB2ObjectSize(b2, process.env.BUCKET_NAME, data['b2path']);
+            console.log(`Looking for ${req.body['data']['b2path']} in ${bucket}`);
+            const [count, totalSize, isPrefix] = await getB2ObjectSize(b2, bucket, req.body['data']['b2path']);
+
+            req.body['data']['isPrefix'] = isPrefix;
+            if (count > 1) {
+                interactions.set(interaction_id, req.body['data']);
+                // Ask the user if they want to go ahead
+                res.json({
+                    "title": "Bulk Import",
+                    "description": `${bucket}/${req.body['data']['b2path']} contains ${count} files with total size ${formatBytes(totalSize)} bytes.`,
+                    "fields": [{
+                        "type": "select",
+                        "label": "Proceed with the import?",
+                        "name": "proceed",
+                        "options": [{
+                            "name": "Yes", "value": "yes"
+                        }, {
+                            "name": "No", "value": "no"
+                        }]
+                    }]
+                });
+                return;
+            }
         }
+
+        const task = ('b2path' in req.body['data']) ? IMPORT : EXPORT;
 
         // fork a process for the import/export, so we don't hang the web server
         const childProcess = fork(path.join(__dirname, 'task.js'));
@@ -83,17 +120,17 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
 
         response = (task === IMPORT) ? {
             "title": "Job submitted!",
-            "description": `Import job submitted for ${data['b2path']} (${formatBytes(req.body.filesize)})`
+            "description": `Import job submitted for ${bucket}/${req.body['data']['b2path']} (${formatBytes(totalSize)} bytes)`
         } : {
             'title': 'Job submitted!',
-            'description': `${task} job submitted for ${data['depth']}.`
+            'description': `Export job submitted for ${req.body['data']['depth']}.`
         };
     } catch (err) {
         console.log('Caught error in app.post: ', err);
         response = {
             "title": "Error",
             "description": err['name'] === 'NotFound'
-                ? `${data['b2path']} not found`
+                ? `${req.body['data']['b2path']} not found`
                 : err['name']
         };
     }

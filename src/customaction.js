@@ -27,6 +27,7 @@ import crypto from 'crypto' ;
 import {getFioAsset, getFioAssets, getFioFolder, createFioFolder, createFioAsset} from "./frameio.js" ;
 import {getB2Connection, uploadUrlToB2, createB2SignedUrl} from "./b2.js" ;
 import path from "path";
+import {paginateListObjectsV2} from "@aws-sdk/client-s3";
 
 export const IMPORT = 'Import';
 export const EXPORT = 'Export';
@@ -206,30 +207,56 @@ export async function exportFiles(request) {
 }
 
 export async function importFiles(req) {
-    const b2 = getB2Connection();
+    const client = getB2Connection();
 
-    // We can create the signed URL at the same time as the download folder
-    const promises = [];
-    promises.push(createB2SignedUrl(b2, process.env.BUCKET_NAME, req.data['b2path'],
-        process.env.SIGNED_URL_EXPIRATION || 86400));
-    promises.push(getFioAsset(req.resource.id).then(async (asset) => {
+    const download_folder_id = await getFioAsset(req.resource.id).then(async (asset) => {
         const rootId = asset['project']['root_asset_id'];
-        console.log('root:', rootId);
-        const folderId = await getFioFolder(rootId, process.env.DOWNLOAD_PATH);
-        return folderId || createFioFolder(rootId, process.env.DOWNLOAD_PATH);
-    }));
-
-    // remove exports folder name when re-importing
-    let name = req.data['b2path'].replace(process.env.UPLOAD_PATH, '');
-    if (name.startsWith('/')) {
-        name = name.substring(1);
-    }
-    const output = await Promise.all(promises).then(async (values) => {
-        const signedUrl = values[0];
-        const parent_id = values[1];
-
-        return createFioAsset(name, parent_id, signedUrl, req.filesize);
+        return await getFioFolder(rootId, process.env.DOWNLOAD_PATH)
+            || createFioFolder(rootId, process.env.DOWNLOAD_PATH);
     });
+
+    let search_prefix = req.data['b2path'];
+    if (req.data['isPrefix']) {
+        search_prefix += '/';
+    }
+
+    const bucket = process.env.BUCKET_NAME;
+    const folderCache = new Map();
+
+    async function getNameAndFolderId(download_folder_id, key) {
+        let folderId = download_folder_id;
+        let path = '';
+        const segments = key.split('/');
+        // remove exports folder name when re-importing
+        if (segments[0] === process.env.UPLOAD_PATH) {
+            segments.shift()
+        }
+        for (const segment of segments.slice(0, -1)) {
+            const folderPath = path + '/' + segment;
+            folderId = folderCache.get(folderPath);
+            if (!folderId) {
+                folderId = await getFioFolder(folderId, segment) || await createFioFolder(folderId, segment);
+                folderCache.put(path + '/' + segment, folderId);
+            }
+            path = folderPath;
+        }
+        return [segments[segments.length - 1], folderId];
+    }
+
+    const paginator = paginateListObjectsV2(
+        {client},
+        {Bucket: bucket, Prefix: search_prefix}
+    );
+    const assetPromises = [];
+    for await (const { Contents } of paginator) {
+        for (const obj of Contents) {
+            const signedUrl = await createB2SignedUrl(client, bucket, obj.Key);
+            const [name, folderId] = await getNameAndFolderId(download_folder_id, obj.Key);
+            assetPromises.push(createFioAsset(name, folderId, signedUrl, obj.Size));
+        }
+    }
+
+    const output = await Promise.all(assetPromises);
 
     return [{
         b2path: req.data['b2path'],

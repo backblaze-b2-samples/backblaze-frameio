@@ -159,6 +159,7 @@ async function* fetchWithPaging(url, options) {
 
 // create folder in frameio
 export async function createFioFolder(parent_id, name) {
+    console.log(`Creating folder ${name} in ${parent_id}`)
     const body = JSON.stringify({
         'filesize': 0,
         'name': name,
@@ -180,13 +181,13 @@ async function fetchJson(path, opts) {
 }
 
 export async function createFioAsset(name, parent_id, signedUrl, filesize) {
+    console.log(`Creating asset ${name} in ${parent_id}`)
     // create new single asset
     let path = `https://api.frame.io/v2/assets/${parent_id}/children`;
     const body = JSON.stringify({
         'filesize': filesize,
         'name': name,
         'type': 'file',
-
         'source': {'url': signedUrl}
     });
     return fetchJson(path, {
