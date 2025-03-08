@@ -132,33 +132,8 @@ async function fetchJson(path, opts) {
 }
 
 export class FrameIO {
-    account_id;
-
-    constructor() {
-    }
-
     async getFolder(parent_id, name) {
-        if (!this.account_id) {
-            const me = await fetchJson('https://api.frame.io/v2/me');
-            this.account_id = me.account_id;
-        }
-
-        const url = new URL(`https://api.frame.io/v2/search/library`);
-        // Can't filter on name, so we have to search and check the name
-        const body = JSON.stringify({
-            account_id: this.account_id,
-            q: name,
-            filter: {
-                "parent_id" : {
-                    "op": "eq",
-                    "value": parent_id
-                },
-            },
-        });
-        const response = fetchWithPaging(url.href, {
-            method: 'POST',
-            body: body
-        });
+        const response = fetchWithPaging(`https://api.frame.io/v2/assets/${parent_id}/children`);
         for await (const asset of response) {
             if (asset['name'] === name) {
                 return asset['id'];
