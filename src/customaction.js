@@ -123,7 +123,7 @@ export async function formProcessor(req, res, next) {
             // todo : possibly limit importing the export location
             formResponse = {
                 "title": "Enter the location",
-                "description": `Please enter the object path to import from Backblaze. As a reminder, your bucket name is ${process.env.BUCKET_NAME}. Only single files are currently supported.`,
+                "description": `Please enter the object path to import from Backblaze. As a reminder, your bucket name is ${process.env.BUCKET_NAME}.`,
                 "fields": [{
                     "type": "text",
                     "label": "B2 Path",
