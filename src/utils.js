@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+import createError from "http-errors";
+
 export function formatBytes(bytes, decimals= 1) {
     if (bytes === 0) return '0 Bytes';
 
@@ -52,8 +54,8 @@ export function checkEnvVars(env_vars) {
 
 export function checkContentType(req, res, next) {
     if (!req.is('application/json')) {
-        console.log(`Bad content type: ${req.get('Content-Type')}`)
-        res.sendStatus(400);
+        console.log(`${req.method} to ${req.url}: bad content type: ${req.get('Content-Type')}`)
+        return next(createError.UnsupportedMediaType());
     } else {
         next();
     }

@@ -56,14 +56,14 @@ export function verifyTimestampAndSignature(req, res, buf) {
     const FIVE_MINUTES = 5 * 60;
 
     if (!timestamp) {
-        console.log('Missing timestamp')
-        throw createError(403);
+        console.log(`${req.method} to ${req.url}: missing timestamp`)
+        throw createError.Forbidden();
     }
 
     // Frame.io suggests verifying that the timestamp is within five minutes of local time
     if (timestamp < (now - FIVE_MINUTES) || timestamp > (now + FIVE_MINUTES)) {
-        console.log(`Timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
-        throw createError(403);
+        console.log(`${req.method} to ${req.url}: timestamp out of bounds. Timestamp: ${timestamp}; now: ${now}`);
+        throw createError.Forbidden();
     }
 
     // Frame.io signature format is 'v0=' + HMAC-256(secret, 'v0:' + timestamp + body)
@@ -73,8 +73,8 @@ export function verifyTimestampAndSignature(req, res, buf) {
     const expectedSignature = 'v0=' + hmac.update(stringToSign).digest('hex');
 
     if (expectedSignature !== req.header('X-Frameio-Signature')) {
-        console.log(`Mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
-        throw createError(403);
+        console.log(`${req.method} to ${req.url}: mismatched HMAC. Expecting '${expectedSignature}', received '${req.header('X-Frameio-Signature')}'`);
+        throw createError.Forbidden();
     }
 }
 
