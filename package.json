@@ -18,7 +18,7 @@
     "@aws-sdk/s3-request-presigner": "~3.726.1",
     "compression": "^1.8.0",
     "dotenv": "^16.4.7",
-    "express": "^4.21.1",
+    "express": "^4.22.2",
     "http-errors": "^2.0.0",
     "node-fetch": "^3.3.2"
   }
