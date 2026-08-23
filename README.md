@@ -39,15 +39,20 @@ Still in the Frame.io Developer Site, create a token (Developer Tools > Tokens >
 
 ## Configure the Container Environment
 
-You need to set the following environment variables in the container environment. The easiest way to do this is to create a `.env` file.
+You need to set the following environment variables in the container environment. The easiest way to do this is to copy `.env.example` to `.env` and fill in the values.
+
+This version intentionally uses the standardized `B2_*` configuration contract only. Legacy AWS-style variables and the old bucket-name variable are not read, so deploy the manifest change in sync with this build and verify the smoke checks before rolling back older containers.
 
 - `FRAMEIO_TOKEN` = The Frame.io developer **token** you obtain from https://developer.frame.io/app/tokens
 - `FRAMEIO_SECRET` = the Frame.io Custom Action **secret** you obtain from https://developer.frame.io/app/custom-actions
-- `AWS_ACCESS_KEY_ID` = Your Backblaze B2 application key ID - it is strongly recommended this is unique for this app
-- `AWS_SECRET_ACCESS_KEY` = Your Backblaze B2 application key - it is strongly recommended this is unique for this app
-- `AWS_ENDPOINT_URL` = Your Backblaze B2 S3-compatible endpoint, in the form `https://s3.REGION.backblazeb2.com`
-- `AWS_REGION` = The region from your Backblaze B2 S3-compatible endpoint, e.g. `us-west-004`
-- `BUCKET_NAME` = Your Backblaze B2 bucket name
+- `B2_APPLICATION_KEY_ID` = Your Backblaze B2 application key ID - it is strongly recommended this is unique for this app
+- `B2_APPLICATION_KEY` = Your Backblaze B2 application key - it is strongly recommended this is unique for this app
+- `B2_BUCKET_NAME` = Your Backblaze B2 bucket name
+- `B2_REGION` = The region from your Backblaze B2 S3-compatible endpoint, e.g. `us-west-004`
+- `B2_ENDPOINT` = Optional S3-compatible endpoint override, for example a test endpoint or proxy; defaults to `https://s3.${B2_REGION}.backblazeb2.com`
+- `B2_MAX_ATTEMPTS` = Optional maximum retry attempts for the S3 client; defaults to `10`
+- `B2_ALLOWED_IMPORT_PREFIX` = Optional B2 key prefix that imports are allowed to read; defaults to `UPLOAD_PATH`
+- `B2_PUBLIC_URL_BASE` = Optional reserved compatibility variable for Backblaze B2 sample standards; this app does not read it today
 - `UPLOAD_PATH` = Path in Backblaze B2 for exports, for example `fio_exports`
 - `DOWNLOAD_PATH` = Folder in Frame.io for imports, for example `b2_imports`
 

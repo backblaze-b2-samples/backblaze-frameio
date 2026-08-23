@@ -24,10 +24,25 @@ SOFTWARE.
 
 import {GetObjectCommand, S3, paginateListObjectsV2, HeadObjectCommand, NotFound} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
+import {createRequire} from "module";
 import stream from "stream";
 import fetch from "node-fetch";
 
 import {formatBytes} from "./utils.js";
+
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json");
+
+const B2_USER_AGENT = `${pkg.name}/${pkg.version} (backblaze-b2-samples)`;
+const DEFAULT_MAX_ATTEMPTS = 10;
+
+export function getB2MaxAttempts(value = process.env.B2_MAX_ATTEMPTS) {
+    const rawValue = String(value === undefined || value === null || value === '' ? DEFAULT_MAX_ATTEMPTS : value).trim();
+    if (!/^[1-9]\d*$/.test(rawValue)) {
+        throw new Error('B2_MAX_ATTEMPTS must be a positive integer');
+    }
+    return parseInt(rawValue, 10);
+}
 
 class Uploader {
     // Defaults same as AWS SDK
@@ -176,7 +191,18 @@ export function uploadUrlToB2(options) {
 }
 
 export function getB2Connection() {
-    return new S3({customUserAgent: 'b2-node-docker-0.2'});
+    const region = process.env.B2_REGION.trim();
+    const endpoint = (process.env.B2_ENDPOINT || `https://s3.${region}.backblazeb2.com`).trim();
+    return new S3({
+        region,
+        endpoint,
+        credentials: {
+            accessKeyId: process.env.B2_APPLICATION_KEY_ID,
+            secretAccessKey: process.env.B2_APPLICATION_KEY
+        },
+        customUserAgent: B2_USER_AGENT,
+        maxAttempts: getB2MaxAttempts()
+    });
 }
 
 export async function createB2SignedUrl(client, bucket, key) {

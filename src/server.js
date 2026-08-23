@@ -25,12 +25,14 @@ SOFTWARE.
 import {checkContentType, checkEnvVars, formatBytes} from "./utils.js";
 import {getB2Connection, getB2ObjectSize} from "./b2.js";
 import {
+    assertAllowedB2ImportPath,
     formProcessor,
     verifyTimestampAndSignature,
     IMPORT,
     EXPORT,
     ENV_VARS
 } from "./customaction.js"
+import {encodeImportApprovalValue, parseImportApprovalValue, PendingImportStore} from "./pending_imports.js";
 
 import compression from "compression";
 import express from "express";
@@ -47,12 +49,6 @@ import 'dotenv/config';
 
 checkEnvVars(ENV_VARS);
 
-const DEFAULT_MAX_ATTEMPTS = 10;
-if (!('AWS_MAX_ATTEMPTS' in process.env)) {
-    console.log(`Setting AWS_MAX_ATTEMPTS to ${DEFAULT_MAX_ATTEMPTS}`)
-    process.env['AWS_MAX_ATTEMPTS'] = DEFAULT_MAX_ATTEMPTS;
-}
-
 const b2 = getB2Connection();
 
 const app = express();
@@ -60,8 +56,7 @@ const app = express();
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
-// Map of interaction IDs to data so we can save the filename across actions
-const interactions = new Map();
+const pendingImports = new PendingImportStore();
 
 app.post('/', [checkContentType, formProcessor], async(req, res) => {
     const interaction_id = req.body['interaction_id'];
@@ -70,12 +65,11 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
     console.log(`Server request: ${JSON.stringify(req.body, null, 2)}`);
 
     try {
-        const bucket = process.env.BUCKET_NAME;
+        const bucket = process.env.B2_BUCKET_NAME;
         if ('proceed' in req.body['data']) {
-            // Get the saved data
-            const proceed = req.body['data']['proceed']
-            req.body['data'] = interactions.get(interaction_id);
-            interactions.delete(interaction_id);
+            const {proceed, nonce} = parseImportApprovalValue(req.body['data']['proceed']);
+            req.body['data']['pending_nonce'] = nonce;
+            req.body['data'] = pendingImports.consume(req.body);
             if (proceed === 'yes') {
                 console.log(`User proceeding with import of ${req.body['data']['b2path']}`)
             } else {
@@ -84,6 +78,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
                 return
             }
         } else if ('b2path' in req.body['data']) {
+            req.body['data']['b2path'] = assertAllowedB2ImportPath(req.body['data']['b2path']);
             // Check file exists in B2, and get its size
             console.log(`Looking for ${req.body['data']['b2path']} in ${bucket}`);
             const [count, totalSize, isPrefix] = await getB2ObjectSize(b2, bucket, req.body['data']['b2path']);
@@ -91,7 +86,7 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
             req.body['data']['isPrefix'] = isPrefix;
             req.body['data']['totalSize'] = totalSize;
             if (count > 1) {
-                interactions.set(interaction_id, req.body['data']);
+                const pendingImport = pendingImports.create(interaction_id, req.body, req.body['data']);
                 // Ask the user if they want to go ahead
                 res.json({
                     "title": "Bulk Import",
@@ -101,9 +96,9 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
                         "label": "Proceed with the import?",
                         "name": "proceed",
                         "options": [{
-                            "name": "Yes", "value": "yes"
+                            "name": "Yes", "value": encodeImportApprovalValue("yes", pendingImport.nonce)
                         }, {
-                            "name": "No", "value": "no"
+                            "name": "No", "value": encodeImportApprovalValue("no", pendingImport.nonce)
                         }]
                     }]
                 });
@@ -126,12 +121,15 @@ app.post('/', [checkContentType, formProcessor], async(req, res) => {
         };
     } catch (err) {
         console.log('Caught error in app.post: ', err);
+        const statusCode = err.statusCode || err.status || (err['name'] === 'NotFound' ? 404 : 500);
         response = {
             "title": "Error",
             "description": err['name'] === 'NotFound'
                 ? `${req.body['data']['b2path']} not found`
                 : err['name']
         };
+        res.status(statusCode).json(response);
+        return;
     }
 
     console.log(`Server response: ${JSON.stringify(response, null, 2)}`);
