@@ -57,6 +57,7 @@ if (!('AWS_MAX_ATTEMPTS' in process.env)) {
 const b2 = getB2Connection();
 
 const app = express();
+app.set('trust proxy', 1);
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
