@@ -34,6 +34,7 @@ import {
 
 import compression from "compression";
 import express from "express";
+import {rateLimit} from 'express-rate-limit';
 import {fork} from "child_process";
 import {fileURLToPath} from 'url';
 import path from 'path';
@@ -60,10 +61,21 @@ const app = express();
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
+const customActionLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: {
+        "title": "Too many requests",
+        "description": "Please wait before submitting another request."
+    }
+});
+
 // Map of interaction IDs to data so we can save the filename across actions
 const interactions = new Map();
 
-app.post('/', [checkContentType, formProcessor], async(req, res) => {
+app.post('/', [customActionLimiter, checkContentType, formProcessor], async(req, res) => {
     const interaction_id = req.body['interaction_id'];
     let response;
 
