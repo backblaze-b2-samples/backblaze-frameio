@@ -34,6 +34,7 @@ import {
 
 import compression from "compression";
 import express from "express";
+import {rateLimit} from 'express-rate-limit';
 import {fork} from "child_process";
 import {fileURLToPath} from 'url';
 import path from 'path';
@@ -56,14 +57,26 @@ if (!('AWS_MAX_ATTEMPTS' in process.env)) {
 const b2 = getB2Connection();
 
 const app = express();
+app.set('trust proxy', 1);
 // Verify the timestamp and signature before JSON parsing, so we have access to the raw body
 app.use(express.json({verify: verifyTimestampAndSignature}));
 app.use(compression());
 
+const customActionLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: {
+        "title": "Too many requests",
+        "description": "Please wait before submitting another request."
+    }
+});
+
 // Map of interaction IDs to data so we can save the filename across actions
 const interactions = new Map();
 
-app.post('/', [checkContentType, formProcessor], async(req, res) => {
+app.post('/', [customActionLimiter, checkContentType, formProcessor], async(req, res) => {
     const interaction_id = req.body['interaction_id'];
     let response;
 
